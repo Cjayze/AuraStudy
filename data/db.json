@@ -1,0 +1,518 @@
+{
+  "users": [
+    {
+      "id": "usr_student_01",
+      "email": "student@aurastudy.edu.vn",
+      "password_hash": "$2b$10$Q109ApnxHosaY142T1At2eg9e2i9C1v87vUhs27beS75AEdxbp33e",
+      "full_name": "Nguyễn Văn An",
+      "role": "student",
+      "avatar_url": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150",
+      "is_active": true,
+      "created_at": "2026-08-28T18:08:13.338Z"
+    },
+    {
+      "id": "usr_admin_01",
+      "email": "admin@aurastudy.edu.vn",
+      "password_hash": "$2b$10$Q109ApnxHosaY142T1At2eoT2Qoi.AdKdXB.V4tBVSnw0fpIX4lae",
+      "full_name": "Trần Quản Trị",
+      "role": "admin",
+      "avatar_url": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150",
+      "is_active": true,
+      "created_at": "2026-08-05T18:08:13.338Z"
+    },
+    {
+      "id": "usr_1788607787985_5e85u",
+      "email": "manhnguyen040725@gmail.com",
+      "password_hash": "$2b$10$FwxGPMxHbQiTs798Q9T.COHlkLPR1QRyKyCePdrRmOLe43MwM8jc.",
+      "full_name": "Nguyen Dieu Anh",
+      "school": "DH Phenikaa",
+      "role": "student",
+      "is_active": true,
+      "created_at": "2026-09-05T11:29:48.082Z"
+    }
+  ],
+  "documents": [
+    {
+      "id": "doc_1788592502250_6alj",
+      "user_id": "usr_student_01",
+      "title": "Kiến trúc mạng TCP/IP",
+      "subject": "Mạng máy tính",
+      "file_name": "test_upload.txt",
+      "file_type": "txt",
+      "file_size": 97,
+      "file_path": "/uploads/doc_1788592502250_6alj_test_upload.txt",
+      "status": "ready",
+      "raw_text": "Đây là tài liệu thử nghiệm về Kiến trúc mạng máy tính và giao thức TCP/IP.\n",
+      "created_at": "2026-09-05T07:15:02.251Z"
+    },
+    {
+      "id": "doc_1788592693460_zy71",
+      "user_id": "usr_student_01",
+      "title": "Giáo trình Học Máy",
+      "subject": "Trí tuệ nhân tạo",
+      "file_name": "ml_doc.txt",
+      "file_type": "txt",
+      "file_size": 79,
+      "file_path": "/uploads/doc_1788592693460_zy71_ml_doc.txt",
+      "status": "ready",
+      "raw_text": "Tài liệu môn Học máy: Hồi quy tuyến tính và Cây quyết định.\n",
+      "created_at": "2026-09-05T07:18:13.460Z"
+    }
+  ],
+  "document_chunks": [
+    {
+      "id": "chk_doc_1788592502250_6alj_0",
+      "document_id": "doc_1788592502250_6alj",
+      "chunk_index": 0,
+      "content": "Đây là tài liệu thử nghiệm về Kiến trúc mạng máy tính và giao thức TCP/IP.",
+      "char_count": 74,
+      "vector_id": "vec_doc_1788592502250_6alj_0"
+    },
+    {
+      "id": "chk_doc_1788592693460_zy71_0",
+      "document_id": "doc_1788592693460_zy71",
+      "chunk_index": 0,
+      "content": "Tài liệu môn Học máy: Hồi quy tuyến tính và Cây quyết định.",
+      "char_count": 59,
+      "vector_id": "vec_doc_1788592693460_zy71_0"
+    }
+  ],
+  "chat_sessions": [],
+  "chat_messages": [],
+  "quizzes": [
+    {
+      "id": "quiz_1788609778701_38yq",
+      "document_id": "doc_1788592502250_6alj",
+      "user_id": "usr_student_01",
+      "title": "Đánh giá kiến thức chuyên sâu về kiến trúc mạng TCP/IP",
+      "difficulty": "medium",
+      "total_questions": 5,
+      "created_at": "2026-09-05T12:02:58.701Z"
+    },
+    {
+      "id": "quiz_1788609763923_3uj5",
+      "document_id": "doc_1788592502250_6alj",
+      "user_id": "usr_student_01",
+      "title": "Đề trắc nghiệm: Kiến trúc mạng TCP/IP (5 câu - MEDIUM)",
+      "difficulty": "medium",
+      "total_questions": 5,
+      "created_at": "2026-09-05T12:02:43.923Z"
+    },
+    {
+      "id": "quiz_1788594375128_z8x9",
+      "document_id": "doc_1788592502250_6alj",
+      "user_id": "usr_student_01",
+      "title": "Đề trắc nghiệm: Kiến trúc mạng TCP/IP (5 câu - MEDIUM)",
+      "difficulty": "medium",
+      "total_questions": 5,
+      "created_at": "2026-09-05T07:46:15.128Z"
+    },
+    {
+      "id": "quiz_1788594341247_lw9c",
+      "document_id": "doc_1788592502250_6alj",
+      "user_id": "usr_student_01",
+      "title": "Đề trắc nghiệm: Kiến trúc mạng TCP/IP (4 câu - MEDIUM)",
+      "difficulty": "medium",
+      "total_questions": 4,
+      "created_at": "2026-09-05T07:45:41.247Z"
+    }
+  ],
+  "questions": [
+    {
+      "id": "q_quiz_1788592917292_boze_1",
+      "quiz_id": "quiz_1788592917292_boze",
+      "question_text": "Theo tài liệu \"Buoi02_NenTangPHP_BienKieuDieuKhien.pptx\", khái niệm \"x��ZK�\\G\u0015.�GB�&�\u0010�K���\u0013{��N��A\u0002el�\u0004?�A�3�P4&v�=�\u001fH�رD�\u0015�$\b�#��X!@�D$�X�\u001f�\u0001�꾏�[�=�}a�\u0019uw�s�=��s����RWJ���d���ށ|,1P\" được định nghĩa/mô tả như thế nào?",
+      "option_a": "���W\u001c>�E�s m\fއ|��=�`\r1��<t��\u000f�-�.�<�\u0017�7~��-%�?e\t.F2�`��c���mP^>����\u0007���M���%�\u0018\u0013FV;\u001f=�\u0019ɍ<\u0017\u001dU�gq����T\u0016��\fG�j�C\u00024\u0016�Ҍ5Q��J�Ș�CtC�\"o)T^kiR��B�VT\u0016�IZo�v\u00184�=",
+      "option_b": "Một quy trình ngẫu nhiên không thuộc phạm vi của x��ZK�\\G\u0015.�GB�&�\u0010�K���\u0013{��N��A\u0002el�\u0004?�A�3�P4&v�=�\u001fH�رD�\u0015�$\b�#��X!@�D$�X�\u001f�\u0001�꾏�[�=�}a�\u0019uw�s�=��s����RWJ���d���ށ|,1P.",
+      "option_c": "Là định lý toán học áp dụng riêng cho thuật toán tối ưu.",
+      "option_d": "Tập hợp các tham số không hợp lệ trong cấu hình hệ thống.",
+      "correct_ans": "A",
+      "explanation": "Trong tài liệu bài học có nêu rõ: \"x��ZK�\\G\u0015.�GB�&�\u0010�K���\u0013{��N��A\u0002el�\u0004?�A�3�P4&v�=�\u001fH�رD�\u0015�$\b�#��X!@�D$�X�\u001f�\u0001�꾏�[�=�}a�\u0019uw�s�=��s����RWJ���d���ށ|,1P:���W\u001c>�E�s m\fއ|��=�`\r1��<t��\u000f�-�.�<�\u0017�7~��-%�?e\t.F2�`��c���mP^>����\u0007���M���%�\u0018\u0013FV;\u001f=�\u0019ɍ<\u0017\u001dU�gq����T\u0016��\fG�j�C\u00024\u0016�Ҍ5Q��J�Ș�CtC�\"o)T^kiR��B�VT\u0016�IZo�v\u00184�=i�w�A���c\u0002)8��Cp�r\u000e&Oћ�y�\u0005\u001e\u0010\u0015�|O�@6�,\u00173�U�&C�\u001er#��u���\u0013�kIZ��l\u0015�tFÄ��R{�L\u0006XO��쵰\u001aZ\u0003���S��\u0002�k\u0002:E�ee\u0012i\u001704��\u0014X�V���\u000b�K\u0011l\u000fZ��ɘ����x�G�h\u001f�$�\u001c�74\u0014@�d)U��9c\"\u0014��\u0006W�@�o�2{�6�N|�w&b��\u001aH�Ty\u000b\u000bX��U\u0004eD0�-���^��\\�\b&���\u0011���O6�m({\u001dT�e�>\u001af}\u00155\u001a��ک\b��\f�pUj�/��r��������.i�U\r��t��+_畟�9��\u0000\u001d�=��\u0012k\u0015�\u001d�<5iܒ���\bRscKj܌\u0005�\t���\u001d�Q\u001f�\u001c\u00014\u0002��ģINY\u001eq����w��\u000b��{��$�\u0018r���De�\u0010B$����ܙ䢝{������Ǧ�ٗ�;�\"f��2W\r$�\r��\u000es��-���\u0014��ݍ�ˊC�'��C\u001a�$K��︹��\u001c�\u0010\u0011�W�����\u0011sl���(\u000e�\u0005Ea�(N�]�\u0007�j%\u001d��+��\t��>sX��x�_�\u00162\u0007��J�5� Fh�\u0018���\u0017�\u0011�\u001b\f\u001d�\u0007�\u0003�M\u001f�_�B��ё�\u0010�\u000e\u000b�\u0005��&�:�b���Qvh�A\u0019����ܔw���!p\u0013*\u0000ұ���\u000f��M\b�!\u0018T\u001a}���%\u0007��Q�JX?���oC��\u0012y,\u0014��\u00040\u0006ƻë����iqzY�+��B��D}\u0019��<��\u0013�������xm����\u001d\u001a�\u001f��\u001c�����\u0015�\u001e\". Do đó đáp án A là câu trả lời chính xác nhất."
+    },
+    {
+      "id": "q_quiz_1788592917292_boze_2",
+      "quiz_id": "quiz_1788592917292_boze",
+      "question_text": "Theo tài liệu \"Buoi02_NenTangPHP_BienKieuDieuKhien.pptx\", khái niệm \"gz27>YQ�\"lȯ&Y.�\u000e���\u0011�P1\u0012U\u001b \u0006�\u001b\t�fP���\u001f�����BA���m��39\u000f|��ӂ���|y䑋-R@O�1����̵>@��#B \u0016}R\u0006�\u001e\" được định nghĩa/mô tả như thế nào?",
+      "option_a": "��\u0017�\u001c�u�'Q���!=r#\\�!��5�Þ<�D ��\u001a�\u0012�0 +\u0003:J>�\u0014%��>F�l#�J4��5ɀ\r:;nR#�A�G�@!,�\t��j��]\u0004\u001c�:�\u00141H\u000eu��\\�%��6#m(�I�5\u0014`�\bٸߥ�5<l�5�\u0002>YO�!�u�4�\u001ao��N�fCԲJ0\u0004$h\u000eq\u0007�4",
+      "option_b": "Một quy trình ngẫu nhiên không thuộc phạm vi của gz27>YQ�\"lȯ&Y.�\u000e���\u0011�P1\u0012U\u001b \u0006�\u001b\t�fP���\u001f�����BA���m��39\u000f|��ӂ���|y䑋-R@O�1����̵>@��#B \u0016}R\u0006�\u001e.",
+      "option_c": "Là định lý toán học áp dụng riêng cho thuật toán tối ưu.",
+      "option_d": "Tập hợp các tham số không hợp lệ trong cấu hình hệ thống.",
+      "correct_ans": "A",
+      "explanation": "Trong tài liệu bài học có nêu rõ: \"gz27>YQ�\"lȯ&Y.�\u000e���\u0011�P1\u0012U\u001b \u0006�\u001b\t�fP���\u001f�����BA���m��39\u000f|��ӂ���|y䑋-R@O�1����̵>@��#B \u0016}R\u0006�\u001e:��\u0017�\u001c�u�'Q���!=r#\\�!��5�Þ<�D ��\u001a�\u0012�0 +\u0003:J>�\u0014%��>F�l#�J4��5ɀ\r:;nR#�A�G�@!,�\t��j��]\u0004\u001c�:�\u00141H\u000eu��\\�%��6#m(�I�5\u0014`�\bٸߥ�5<l�5�\u0002>YO�!�u�4�\u001ao��N�fCԲJ0\u0004$h\u000eq\u0007�4\u001bҸ��&�]q�Ԃ]ڊ� �\u001c\u001b������l�V&^�d\u0013�s>�q����/�\"K�P��<8�p�ڻ�i�����w�QM���N\reE]�\u0010��[U>�,v5�T���V\u0005�?r���[�$��B�S9\u0014\b\u000e--��8c�3\"�Q�8\u0002�\u0002�\u0016k\u001e��M_��?W\u0013�\b�\u0003�\u0018��\u0005|痖:s�z\u000e�\u0001ɭ�v��\u0016�\u0011HA2\u0018.�s��\u00010:�qK�\u0014U.��͍\u001d�\". Do đó đáp án A là câu trả lời chính xác nhất."
+    },
+    {
+      "id": "q_quiz_1788592917292_boze_3",
+      "quiz_id": "quiz_1788592917292_boze",
+      "question_text": "Theo tài liệu \"Buoi02_NenTangPHP_BienKieuDieuKhien.pptx\", khái niệm \"�6�,|�Xt\u0004Ƕ��\u000e��Z�\u0014��Dݢv\u001eOW�I('<�t��ƧGa=g�� c�\u0010��[�D����ԵF\u0001�s;Z��o֘�F]Ǜ���{7O���7���;���9#^��ώ\t\u000e\u0012�\u0018|����\u001a�,��XN��\f�\u0002\u0010\\c\u0004+\u001b�����q��?[g]Y���@y�o`�ט9\u0017\u0010d�ڍ�1so�G�\u000bsf>\u0012��ҹ\u000fH�\u000eY�<��טyPT%rs��\" được định nghĩa/mô tả như thế nào?",
+      "option_a": "_�9�2�D;��Pǥu��uo���{�kL\u0016��Qѕ��wK�H�\\\\\u0012�\u0013_Y˘�[��r��\u0003X',�rBҷ��8#�&~���ў\"{k�����q|�(\u001b\u001c�\u0017���\\Z�\u0016Y������{,��9\\@�a\b���1LvY��h��i��.\u0011�3�������V�<\"?R1F�;-~ғs",
+      "option_b": "Một quy trình ngẫu nhiên không thuộc phạm vi của �6�,|�Xt\u0004Ƕ��\u000e��Z�\u0014��Dݢv\u001eOW�I('<�t��ƧGa=g�� c�\u0010��[�D����ԵF\u0001�s;Z��o֘�F]Ǜ���{7O���7���;���9#^��ώ\t\u000e\u0012�\u0018|����\u001a�,��XN��\f�\u0002\u0010\\c\u0004+\u001b�����q��?[g]Y���@y�o`�ט9\u0017\u0010d�ڍ�1so�G�\u000bsf>\u0012��ҹ\u000fH�\u000eY�<��טyPT%rs��.",
+      "option_c": "Là định lý toán học áp dụng riêng cho thuật toán tối ưu.",
+      "option_d": "Tập hợp các tham số không hợp lệ trong cấu hình hệ thống.",
+      "correct_ans": "A",
+      "explanation": "Trong tài liệu bài học có nêu rõ: \"�6�,|�Xt\u0004Ƕ��\u000e��Z�\u0014��Dݢv\u001eOW�I('<�t��ƧGa=g�� c�\u0010��[�D����ԵF\u0001�s;Z��o֘�F]Ǜ���{7O���7���;���9#^��ώ\t\u000e\u0012�\u0018|����\u001a�,��XN��\f�\u0002\u0010\\c\u0004+\u001b�����q��?[g]Y���@y�o`�ט9\u0017\u0010d�ڍ�1so�G�\u000bsf>\u0012��ҹ\u000fH�\u000eY�<��טyPT%rs��:_�9�2�D;��Pǥu��uo���{�kL\u0016��Qѕ��wK�H�\\\\\u0012�\u0013_Y˘�[��r��\u0003X',�rBҷ��8#�&~���ў\"{k�����q|�(\u001b\u001c�\u0017���\\Z�\u0016Y������{,��9\\@�a\b���1LvY��h��i��.\u0011�3�������V�<\"?R1F�;-~ғs%\u0018�������^����nh�k-WE]\u001b�y\"\u000e���\u001b��\u001e!7��g������ѩD�3\u0001��3�ܤ�\u001c}x&�\u001f�(j\u000eVm�d�db\u001f�H�\u000f\u000f,�\". Do đó đáp án A là câu trả lời chính xác nhất."
+    },
+    {
+      "id": "q_quiz_1788592917292_boze_4",
+      "quiz_id": "quiz_1788592917292_boze",
+      "question_text": "Theo tài liệu \"Buoi02_NenTangPHP_BienKieuDieuKhien.pptx\", khái niệm \"e4U�^Q_�\u0006�����IO��K�$�}a\u0001�\u001d�\u001e\u0016�E+3�l=L\u000f�\u0013�\u0018\u001c�EHs�\" được định nghĩa/mô tả như thế nào?",
+      "option_a": "��փ���\u0018cxM>\u001c\u001a\u001ar�!��˭*j\u000e4��\u001c.#��t\u000f�ȑ\u0010���O}��6��%fо\u001c���u��ل\u000e���7H\u0016������]�D�$8�mf�<�oh������'L��7ۡ��_ȋ9��_hx�`��*���\u0002�ƌ�\u001fCPX ���\u001c���\u0017��\f���1�\u001e\u001di\u001fߤ�x�d",
+      "option_b": "Một quy trình ngẫu nhiên không thuộc phạm vi của e4U�^Q_�\u0006�����IO��K�$�}a\u0001�\u001d�\u001e\u0016�E+3�l=L\u000f�\u0013�\u0018\u001c�EHs�.",
+      "option_c": "Là định lý toán học áp dụng riêng cho thuật toán tối ưu.",
+      "option_d": "Tập hợp các tham số không hợp lệ trong cấu hình hệ thống.",
+      "correct_ans": "A",
+      "explanation": "Trong tài liệu bài học có nêu rõ: \"e4U�^Q_�\u0006�����IO��K�$�}a\u0001�\u001d�\u001e\u0016�E+3�l=L\u000f�\u0013�\u0018\u001c�EHs�:��փ���\u0018cxM>\u001c\u001a\u001ar�!��˭*j\u000e4��\u001c.#��t\u000f�ȑ\u0010���O}��6��%fо\u001c���u��ل\u000e���7H\u0016������]�D�$8�mf�<�oh������'L��7ۡ��_ȋ9��_hx�`��*���\u0002�ƌ�\u001fCPX ���\u001c���\u0017��\f���1�\u001e\u001di\u001fߤ�x�d�*��c|�\u0016R�\u0005��xX\u000b\u0013��<N�jSڜ�/�g\u0010�-L�xz�]�EJՕK\u0006uz_�^\u001b\u0013ׂ�'U0Y\u000e��h��\u0002\u0001\t-\b�`�\u000b8��IH\u0005,'ן��t��Jp�,\\���_s��\u0002Y.V1�\u0004�#\u00192z�h��o�u�͔�\r@\tk�~`>��%�\u001a~R~\u001fs�.n�;\u0006����0'ś�\"\\���1��&;�\u0017�H���{���\u0015��!K8+\u001em�&}�ǹ\u001f�y�{c���'g.�_�\u0003S���e��m�\u000f�p`nK\u0017B�-\u0013~1���ǀk�P�\u0006�I\buT��{\u001aڸCsHnff\rtH+�\u0001T�+����\u001b�vSN��{J\u0012x\u0003\"o��\u0004m|�r�)���ʩ\u0018R\u0001��dcbP\\��\f?\u0019�\u0005`�\u001b\u0014����n�\u00020\u000e�w� ��\u0014\u0012\u0010�����$��\u0007��yޣx=_�=�\u00064���/�\u00174��aM�\u0006SG�%\u0015�X?\u0005vF�z�T�2�Ho\\�\u0005��\u0007E�[\u0016�tiE\u0001U�sX�$��)��n\u0007vP.��F�4�Co\u000fm���\". Do đó đáp án A là câu trả lời chính xác nhất."
+    },
+    {
+      "id": "q_quiz_1788592917292_boze_5",
+      "quiz_id": "quiz_1788592917292_boze",
+      "question_text": "Theo tài liệu \"Buoi02_NenTangPHP_BienKieuDieuKhien.pptx\", khái niệm \"\u0016\u0017\u0018\u0019\u001a%&'()*456789\" được định nghĩa/mô tả như thế nào?",
+      "option_a": "CDEFGHIJSTUVWXYZcdefghijstuvwxyz���������������������������������������������������������������������������\u0000\u001f\u0001\u0000\u0003\u0001\u0001\u0001\u0001\u0001\u0001\u0001\u0001\u0001\u0000\u0000\u0000\u0000\u0000\u0000\u0001\u0002\u0003\u0004\u0005\u0006\u0007\b",
+      "option_b": "Một quy trình ngẫu nhiên không thuộc phạm vi của \u0016\u0017\u0018\u0019\u001a%&'()*456789.",
+      "option_c": "Là định lý toán học áp dụng riêng cho thuật toán tối ưu.",
+      "option_d": "Tập hợp các tham số không hợp lệ trong cấu hình hệ thống.",
+      "correct_ans": "A",
+      "explanation": "Trong tài liệu bài học có nêu rõ: \"\u0016\u0017\u0018\u0019\u001a%&'()*456789:CDEFGHIJSTUVWXYZcdefghijstuvwxyz���������������������������������������������������������������������������\u0000\u001f\u0001\u0000\u0003\u0001\u0001\u0001\u0001\u0001\u0001\u0001\u0001\u0001\u0000\u0000\u0000\u0000\u0000\u0000\u0001\u0002\u0003\u0004\u0005\u0006\u0007\b\". Do đó đáp án A là câu trả lời chính xác nhất."
+    },
+    {
+      "id": "q_quiz_1788592917292_boze_6",
+      "quiz_id": "quiz_1788592917292_boze",
+      "question_text": "Theo tài liệu \"Buoi02_NenTangPHP_BienKieuDieuKhien.pptx\", khái niệm \"\u0016$4�%�\u0017\u0018\u0019\u001a&'()*56789\" được định nghĩa/mô tả như thế nào?",
+      "option_a": "CDEFGHIJSTUVWXYZcdefghijstuvwxyz��������������������������������������������������������������������������\u0000\f\u0003\u0001\u0000\u0002\u0011\u0003\u0011\u0000?\u0000�ڊ(�Ӝ(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��",
+      "option_b": "Một quy trình ngẫu nhiên không thuộc phạm vi của \u0016$4�%�\u0017\u0018\u0019\u001a&'()*56789.",
+      "option_c": "Là định lý toán học áp dụng riêng cho thuật toán tối ưu.",
+      "option_d": "Tập hợp các tham số không hợp lệ trong cấu hình hệ thống.",
+      "correct_ans": "A",
+      "explanation": "Trong tài liệu bài học có nêu rõ: \"\u0016$4�%�\u0017\u0018\u0019\u001a&'()*56789:CDEFGHIJSTUVWXYZcdefghijstuvwxyz��������������������������������������������������������������������������\u0000\f\u0003\u0001\u0000\u0002\u0011\u0003\u0011\u0000?\u0000�ڊ(�Ӝ(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000(��\u0000��\". Do đó đáp án A là câu trả lời chính xác nhất."
+    },
+    {
+      "id": "q_quiz_1788592917292_boze_7",
+      "quiz_id": "quiz_1788592917292_boze",
+      "question_text": "Theo tài liệu \"Buoi02_NenTangPHP_BienKieuDieuKhien.pptx\", khái niệm \"����=\u0004-5��\b\u001c�\u0012W`�YET)�O0\u0012\u0018yI���\" được định nghĩa/mô tả như thế nào?",
+      "option_a": "�:��m�8���J��]%+f��\u0012��(a���M��\u0016�-�`ǉ���\r�\u000b���\"+W����Xa�K�\u0014\\m\u000b�\u0000��1�m�\u0012�\\\u0004�\u0015⊬B��t��2]��Z��b%8��\u001d�S�,��`�+�5ukf����K0Ɨ�&�\u0012\\a�&�bl=����&P���uլB5\u0012��I��BpK",
+      "option_b": "Một quy trình ngẫu nhiên không thuộc phạm vi của ����=\u0004-5��\b\u001c�\u0012W`�YET)�O0\u0012\u0018yI���.",
+      "option_c": "Là định lý toán học áp dụng riêng cho thuật toán tối ưu.",
+      "option_d": "Tập hợp các tham số không hợp lệ trong cấu hình hệ thống.",
+      "correct_ans": "A",
+      "explanation": "Trong tài liệu bài học có nêu rõ: \"����=\u0004-5��\b\u001c�\u0012W`�YET)�O0\u0012\u0018yI���:�:��m�8���J��]%+f��\u0012��(a���M��\u0016�-�`ǉ���\r�\u000b���\"+W����Xa�K�\u0014\\m\u000b�\u0000��1�m�\u0012�\\\u0004�\u0015⊬B��t��2]��Z��b%8��\u001d�S�,��`�+�5ukf����K0Ɨ�&�\u0012\\a�&�bl=����&P���uլB5\u0012��I��BpK�m�\u0004\u0015�\u001d6\u0002�-M�\u0003��\b��\u0002+W-l_kcyQW\u0005���\u001d\f*����h�&��B\u0011(�Ԯ9���P��>p�e���7��J`��e�*Xh\u0002\u0016X*\u00028�D\\=V��\u0018�ǫp)��\u0016*A�65��h\u0005li\u0002\u0016خ\b���j,\u001a\u0002+\\\f.�\u0002��*A�V��\u001eh-,5\u0001\u0005��\u0000z\u0000\\\r�xU�[tYpYnKݦ����l���ڳ�4AZ\t0���\u0011�S8\u0011oInhK��\u0004j\u0004s��\b�*65A�\u0012���\"H��q\rYc�\". Do đó đáp án A là câu trả lời chính xác nhất."
+    },
+    {
+      "id": "q_quiz_1788592917292_boze_8",
+      "quiz_id": "quiz_1788592917292_boze",
+      "question_text": "Theo tài liệu \"Buoi02_NenTangPHP_BienKieuDieuKhien.pptx\", khái niệm \"�ƕ��,�*\u0001c�ڶk\u0004U���\" được định nghĩa/mô tả như thế nào?",
+      "option_a": "��\tJ`s���b����2\\\b.�b�RlU#�V��\u0007aK\u0013t+A",
+      "option_b": "Một quy trình ngẫu nhiên không thuộc phạm vi của �ƕ��,�*\u0001c�ڶk\u0004U���.",
+      "option_c": "Là định lý toán học áp dụng riêng cho thuật toán tối ưu.",
+      "option_d": "Tập hợp các tham số không hợp lệ trong cấu hình hệ thống.",
+      "correct_ans": "A",
+      "explanation": "Trong tài liệu bài học có nêu rõ: \"�ƕ��,�*\u0001c�ڶk\u0004U���:��\tJ`s���b����2\\\b.�b�RlU#�V��\u0007aK\u0013t+A\". Do đó đáp án A là câu trả lời chính xác nhất."
+    },
+    {
+      "id": "q_quiz_1788592917292_boze_9",
+      "quiz_id": "quiz_1788592917292_boze",
+      "question_text": "Theo tài liệu \"Buoi02_NenTangPHP_BienKieuDieuKhien.pptx\", khái niệm \"V�֙�\u00053\b���K��m�\u0011r��օMKA�v!,kX,�ᮑ�0_׶�\u0004޶���kX\u0011����bŦ� �\u0004�\bе�\u0006����*[Q\t\u0010[h\u0004,��i���&(��\"`y]@�G���J���F��\u0002�9��\u0002X<����\u0003��\" được định nghĩa/mô tả như thế nào?",
+      "option_a": "E���ز%\u0001\u001a�α��f�痧�e\u0015k�`E�\u0001���\u0013��sl[ځ��\u0013\fu��\u001a�>���\u0011r��V<\u001bz��z\u0000\u0015�\u0002\u001b�[˸Vm�FHeK�\u0006K��r��\u0016�{�<�����4���.�:���\u001a!�u\u000b-\u001ec�^{�\u0005A�[�[�����:�]�5�\r\u001a!�������E\u0017\u0004\u0007���Mg\u0017",
+      "option_b": "Một quy trình ngẫu nhiên không thuộc phạm vi của V�֙�\u00053\b���K��m�\u0011r��օMKA�v!,kX,�ᮑ�0_׶�\u0004޶���kX\u0011����bŦ� �\u0004�\bе�\u0006����*[Q\t\u0010[h\u0004,��i���&(��\"`y]@�G���J���F��\u0002�9��\u0002X<����\u0003��.",
+      "option_c": "Là định lý toán học áp dụng riêng cho thuật toán tối ưu.",
+      "option_d": "Tập hợp các tham số không hợp lệ trong cấu hình hệ thống.",
+      "correct_ans": "A",
+      "explanation": "Trong tài liệu bài học có nêu rõ: \"V�֙�\u00053\b���K��m�\u0011r��օMKA�v!,kX,�ᮑ�0_׶�\u0004޶���kX\u0011����bŦ� �\u0004�\bе�\u0006����*[Q\t\u0010[h\u0004,��i���&(��\"`y]@�G���J���F��\u0002�9��\u0002X<����\u0003��:E���ز%\u0001\u001a�α��f�痧�e\u0015k�`E�\u0001���\u0013��sl[ځ��\u0013\fu��\u001a�>���\u0011r��V<\u001bz��z\u0000\u0015�\u0002\u001b�[˸Vm�FHeK�\u0006K��r��\u0016�{�<�����4���.�:���\u001a!�u\u000b-\u001ec�^{�\u0005A�[�[�����:�]�5�\r\u001a!�������E\u0017\u0004\u0007���Mg\u0017��z`�pumylU�Ҋ@�/.Mka�B�\u0007\u0007�b��-Ŗ��G{wQZ�\u0016�a{�`MWϖb�˶F{�\u0005��^�a����\u001a��F\u0018BK��ʰ?�� ���\u000f�\u0012���W�!mY\u0010�\r�xX�\u0004[\u0004֥}\u0012��\u000bZo��_Ax�n,��\\\u001d�^�w��\f\u00179�L��}���v��ch���ڽV�Z\u001e���\u001a\u0006{iWk\u001b��N��B;�d\u0015,�]\u001b\u0007֣}��X�VW�\u001a���d'�n�jmGв�]!��\u000b^�|������\tb��*���U�@u\u0001+�1�[�\u001a�\u001eZY����삟E\u0017\u0010�\u0007�y�\u0014�N��\u0016�kł �v��:] J\u0016����\u000e���{9U�V\u001f�]�K�{6�9l\u000f��OnՊ>XT6��[��qh�����A�\u000b���/\b����teP���}�\"���N�\u0004�y��\u0001�g��_���]�\u000fJd�\u001dA��>��\u000b\u001bҲS��V�\u0017\u0016\u000em�\u0005���3l�VTm�\u0007���]�K�@�uZ�ڵ��G��\u0002�d��:\blL���o�k�VG�d��:\u0006�G�V-�A~?X2�~de\u0017�=\u0002����V�\u0017�!�\\d��]\u0000\u000bWT�[�զV�\u001f>P\u001f�Cl�Њ����\b���\u001a�>}U[�\u000b�&�Ph������C�:��\u000f�Clnh�%!E���\u001e_Q�n\r�?�V��<���q�Z$�~d��u�.�&ꃇB�\u000e��Bk\"+�/}G8\u001cl�\u000f�}An^���\u0012���:\u0018l�\u0007�\u0010[!�:�b�\u0012w\u0004�\u000b�&\u001b:}}�7��B�F�n\\~\u0017l\r6|�>\u0010��\u001bڹ�}n[�v�\u0001K6�_��\u0010�B;�\u000e�\"ˎ��vA7�\u000f�!�Jhy\u0019����X��\u000f�?��\u0016�@>r�Ȗ���\u0005[S�\u001dg?��6�\u001eL>�dd;����\u001aj�\f\u000f�|�\u0016Z�rE��V٭�Ə\u0013��x]\bB;}�r�/\u001bY�q\u001d\u0019����\u000bC��\u0019��/s��#�5Ҵ�C[.b��vz\u001d8�\u0017=r�/�~hKӖ'��g�Z�ػ��챏/�0����]�������D���D�'���ϰ�u`ί�r�w�3EV����V-^3ϰ���w� �[�̙�Ъ�k�\u0019�,���u�� �mZg����v�t~�-��˞\u0005�\u000f�CGk�0y\u000f�*��@�\\���\r��-�\u0019���\"e�ϯh�ښf�\f:�fm\u0007Q\u0019�'\u0003~~�*�nh�\f\u0013���u���w�:[d���:x3�\u000e�k\u0002/���_ݸg�'v�ͬ�Z\u0019�'\u0003Y\u0006[�,1�3\fVZ��)��Aep���ϰ\u0005��ie�5�2ӷ��u0\u0006�\u0007�f\u0000ׄ�2���2�����\u0003�\u000e����kؠk�I#�֩��)u��,�\u0019��\f\"ُ���DY�Yx@dׄS.�y��\u0000�\u000e�S�Ȣ�5�v�+(�Z\u001d�{��w.����dS\u001d�ػ�,۹�7��9�\u001cS\u0007���ݻ&���w�SFֆ��.x��Z��Ѡ��۾��\u001acѩ�]�h���\u0001F_\u000eg5KO��-\u0003Y\u0007v�2\u001b��#,�f�j�լڹ��Xv��cP���0�\u0000�/�_E�֋\u00166�9�x�y/����oA\u001d��v�\u0011v�\u0007ط��\u001f��\u000e�0T�9��=�o����h��G�Oc���\u0001\u0016���\u0010�OT����!\u0007����ԁ:¦��s\u0003�:�����dY�\u001a\\�\u0001��MY\u000e���z�Ǐ\u000f\u000f�\u0000ۚa�1G��C����+L��/�������6��h�-�/\u0007剶_V.]W�\u001a|\u000b��`9Hk��2�<�^A͆E;�6Z�*���\b�L�r��l�ҵ5�:��ڥe\u0007,][\u001b�3�׮��=���k����B۳Ί��\u0013\u001f`�h�̼�6���uv�B;M6��z\u0017��Xg��ֿ*��}�d˷t]�E�_���K\u0018��^�\u0015l�%�\\����K�]���>�!�\u0006W)k��V�Jke˳�U]\u0014«��p����&Ks9��ܮ#�}���̤o�i��4�Ǯ&;}��Z�dך\u000bɶ\u0013l�\u0013�m]�Te�Maƴ;�Z��l{�\u0019�\"3챫�~���U�m/�8ORv��l�j\rN,;�5�+�k}��}U|ů����`��O�,��\u001c���\u0016���\u001ds��v�w̵��>u-�]�W��X�]�{��w�/����\u00126�O�\f�# �O-\rXg_���m�n�\u0010,��K�I���C\u0007/]�e۟h^v�j\". Do đó đáp án A là câu trả lời chính xác nhất."
+    },
+    {
+      "id": "q_quiz_1788592917292_boze_10",
+      "quiz_id": "quiz_1788592917292_boze",
+      "question_text": "Theo tài liệu \"Buoi02_NenTangPHP_BienKieuDieuKhien.pptx\", khái niệm \"{4X䷫��\b��/\b�E�~��R�Ū�浠\ff����\u0002�e0症r��\u001b.�ߴ4Q��V�1e0�\u0017޶�$��o\u0012n��ڼ\u0019�k��2h���Q�_�i6(�q��.\u000bv�=8���W\u0006s~�p�\u000e��A~J<�\u0019\u0016�_�\u0001��\t3ʠV\u0007�)�d��F\u0016�\ff�AٻT\u001d���l��\"��Y�\fF��\" được định nghĩa/mô tả như thế nào?",
+      "option_a": "(o\u0007��q{\u000f;\u0003-��o���n����2p/\u000bv��B{XڧZd�ev�5����8��0���-�Qd��\u000bίi�R\\ɦ�Dq����,��\"k�_��\u001a���e�3,/^2�'8��b \"�V�\u0005�/",
+      "option_b": "Một quy trình ngẫu nhiên không thuộc phạm vi của {4X䷫��\b��/\b�E�~��R�Ū�浠\ff����\u0002�e0症r��\u001b.�ߴ4Q��V�1e0�\u0017޶�$��o\u0012n��ڼ\u0019�k��2h���Q�_�i6(�q��.\u000bv�=8���W\u0006s~�p�\u000e��A~J<�\u0019\u0016�_�\u0001��\t3ʠV\u0007�)�d��F\u0016�\ff�AٻT\u001d���l��\"��Y�\fF��.",
+      "option_c": "Là định lý toán học áp dụng riêng cho thuật toán tối ưu.",
+      "option_d": "Tập hợp các tham số không hợp lệ trong cấu hình hệ thống.",
+      "correct_ans": "A",
+      "explanation": "Trong tài liệu bài học có nêu rõ: \"{4X䷫��\b��/\b�E�~��R�Ū�浠\ff����\u0002�e0症r��\u001b.�ߴ4Q��V�1e0�\u0017޶�$��o\u0012n��ڼ\u0019�k��2h���Q�_�i6(�q��.\u000bv�=8���W\u0006s~�p�\u000e��A~J<�\u0019\u0016�_�\u0001��\t3ʠV\u0007�)�d��F\u0016�\ff�AٻT\u001d���l��\"��Y�\fF��:(o\u0007��q{\u000f;\u0003-��o���n����2p/\u000bv��B{XڧZd�ev�5����8��0���-�Qd��\u000bίi�R\\ɦ�Dq����,��\"k�_��\u001a���e�3,/^2�'8��b \"�V�\u0005�/\". Do đó đáp án A là câu trả lời chính xác nhất."
+    },
+    {
+      "id": "q_quiz_1788593151930_54vp_1",
+      "quiz_id": "quiz_1788593151930_54vp",
+      "question_text": "Theo tài liệu \"Buoi02_NenTangPHP_BienKieuDieuKhien.pptx\", khái niệm \"x��ZK�\\G\u0015.�GB�&�\u0010�K���\u0013{��N��A\u0002el�\u0004?�A�3�P4&v�=�\u001fH�رD�\u0015�$\b�#��X!@�D$�X�\u001f�\u0001�꾏�[�=�}a�\u0019uw�s�=��s����RWJ���d���ށ|,1P\" được định nghĩa/mô tả như thế nào?",
+      "option_a": "���W\u001c>�E�s m\fއ|��=�`\r1��<t��\u000f�-�.�<�\u0017�7~��-%�?e\t.F2�`��c���mP^>����\u0007���M���%�\u0018\u0013FV;\u001f=�\u0019ɍ<\u0017\u001dU�gq����T\u0016��\fG�j�C\u00024\u0016�Ҍ5Q��J�Ș�CtC�\"o)T^kiR��B�VT\u0016�IZo�v\u00184�=",
+      "option_b": "Một quy trình ngẫu nhiên không thuộc phạm vi của x��ZK�\\G\u0015.�GB�&�\u0010�K���\u0013{��N��A\u0002el�\u0004?�A�3�P4&v�=�\u001fH�رD�\u0015�$\b�#��X!@�D$�X�\u001f�\u0001�꾏�[�=�}a�\u0019uw�s�=��s����RWJ���d���ށ|,1P.",
+      "option_c": "Là định lý toán học áp dụng riêng cho thuật toán tối ưu.",
+      "option_d": "Tập hợp các tham số không hợp lệ trong cấu hình hệ thống.",
+      "correct_ans": "A",
+      "explanation": "Trong tài liệu bài học có nêu rõ: \"x��ZK�\\G\u0015.�GB�&�\u0010�K���\u0013{��N��A\u0002el�\u0004?�A�3�P4&v�=�\u001fH�رD�\u0015�$\b�#��X!@�D$�X�\u001f�\u0001�꾏�[�=�}a�\u0019uw�s�=��s����RWJ���d���ށ|,1P:���W\u001c>�E�s m\fއ|��=�`\r1��<t��\u000f�-�.�<�\u0017�7~��-%�?e\t.F2�`��c���mP^>����\u0007���M���%�\u0018\u0013FV;\u001f=�\u0019ɍ<\u0017\u001dU�gq����T\u0016��\fG�j�C\u00024\u0016�Ҍ5Q��J�Ș�CtC�\"o)T^kiR��B�VT\u0016�IZo�v\u00184�=i�w�A���c\u0002)8��Cp�r\u000e&Oћ�y�\u0005\u001e\u0010\u0015�|O�@6�,\u00173�U�&C�\u001er#��u���\u0013�kIZ��l\u0015�tFÄ��R{�L\u0006XO��쵰\u001aZ\u0003���S��\u0002�k\u0002:E�ee\u0012i\u001704��\u0014X�V���\u000b�K\u0011l\u000fZ��ɘ����x�G�h\u001f�$�\u001c�74\u0014@�d)U��9c\"\u0014��\u0006W�@�o�2{�6�N|�w&b��\u001aH�Ty\u000b\u000bX��U\u0004eD0�-���^��\\�\b&���\u0011���O6�m({\u001dT�e�>\u001af}\u00155\u001a��ک\b��\f�pUj�/��r��������.i�U\r��t��+_畟�9��\u0000\u001d�=��\u0012k\u0015�\u001d�<5iܒ���\bRscKj܌\u0005�\t���\u001d�Q\u001f�\u001c\u00014\u0002��ģINY\u001eq����w��\u000b��{��$�\u0018r���De�\u0010B$����ܙ䢝{������Ǧ�ٗ�;�\"f��2W\r$�\r��\u000es��-���\u0014��ݍ�ˊC�'��C\u001a�$K��︹��\u001c�\u0010\u0011�W�����\u0011sl���(\u000e�\u0005Ea�(N�]�\u0007�j%\u001d��+��\t��>sX��x�_�\u00162\u0007��J�5� Fh�\u0018���\u0017�\u0011�\u001b\f\u001d�\u0007�\u0003�M\u001f�_�B��ё�\u0010�\u000e\u000b�\u0005��&�:�b���Qvh�A\u0019����ܔw���!p\u0013*\u0000ұ���\u000f��M\b�!\u0018T\u001a}���%\u0007��Q�JX?���oC��\u0012y,\u0014��\u00040\u0006ƻë����iqzY�+��B��D}\u0019��<��\u0013�������xm����\u001d\u001a�\u001f��\u001c�����\u0015�\u001e\". Do đó đáp án A là câu trả lời chính xác nhất."
+    },
+    {
+      "id": "q_quiz_1788593151930_54vp_2",
+      "quiz_id": "quiz_1788593151930_54vp",
+      "question_text": "Theo tài liệu \"Buoi02_NenTangPHP_BienKieuDieuKhien.pptx\", khái niệm \"gz27>YQ�\"lȯ&Y.�\u000e���\u0011�P1\u0012U\u001b \u0006�\u001b\t�fP���\u001f�����BA���m��39\u000f|��ӂ���|y䑋-R@O�1����̵>@��#B \u0016}R\u0006�\u001e\" được định nghĩa/mô tả như thế nào?",
+      "option_a": "��\u0017�\u001c�u�'Q���!=r#\\�!��5�Þ<�D ��\u001a�\u0012�0 +\u0003:J>�\u0014%��>F�l#�J4��5ɀ\r:;nR#�A�G�@!,�\t��j��]\u0004\u001c�:�\u00141H\u000eu��\\�%��6#m(�I�5\u0014`�\bٸߥ�5<l�5�\u0002>YO�!�u�4�\u001ao��N�fCԲJ0\u0004$h\u000eq\u0007�4",
+      "option_b": "Một quy trình ngẫu nhiên không thuộc phạm vi của gz27>YQ�\"lȯ&Y.�\u000e���\u0011�P1\u0012U\u001b \u0006�\u001b\t�fP���\u001f�����BA���m��39\u000f|��ӂ���|y䑋-R@O�1����̵>@��#B \u0016}R\u0006�\u001e.",
+      "option_c": "Là định lý toán học áp dụng riêng cho thuật toán tối ưu.",
+      "option_d": "Tập hợp các tham số không hợp lệ trong cấu hình hệ thống.",
+      "correct_ans": "A",
+      "explanation": "Trong tài liệu bài học có nêu rõ: \"gz27>YQ�\"lȯ&Y.�\u000e���\u0011�P1\u0012U\u001b \u0006�\u001b\t�fP���\u001f�����BA���m��39\u000f|��ӂ���|y䑋-R@O�1����̵>@��#B \u0016}R\u0006�\u001e:��\u0017�\u001c�u�'Q���!=r#\\�!��5�Þ<�D ��\u001a�\u0012�0 +\u0003:J>�\u0014%��>F�l#�J4��5ɀ\r:;nR#�A�G�@!,�\t��j��]\u0004\u001c�:�\u00141H\u000eu��\\�%��6#m(�I�5\u0014`�\bٸߥ�5<l�5�\u0002>YO�!�u�4�\u001ao��N�fCԲJ0\u0004$h\u000eq\u0007�4\u001bҸ��&�]q�Ԃ]ڊ� �\u001c\u001b������l�V&^�d\u0013�s>�q����/�\"K�P��<8�p�ڻ�i�����w�QM���N\reE]�\u0010��[U>�,v5�T���V\u0005�?r���[�$��B�S9\u0014\b\u000e--��8c�3\"�Q�8\u0002�\u0002�\u0016k\u001e��M_��?W\u0013�\b�\u0003�\u0018��\u0005|痖:s�z\u000e�\u0001ɭ�v��\u0016�\u0011HA2\u0018.�s��\u00010:�qK�\u0014U.��͍\u001d�\". Do đó đáp án A là câu trả lời chính xác nhất."
+    },
+    {
+      "id": "q_quiz_1788593151930_54vp_3",
+      "quiz_id": "quiz_1788593151930_54vp",
+      "question_text": "Theo tài liệu \"Buoi02_NenTangPHP_BienKieuDieuKhien.pptx\", khái niệm \"�6�,|�Xt\u0004Ƕ��\u000e��Z�\u0014��Dݢv\u001eOW�I('<�t��ƧGa=g�� c�\u0010��[�D����ԵF\u0001�s;Z��o֘�F]Ǜ���{7O���7���;���9#^��ώ\t\u000e\u0012�\u0018|����\u001a�,��XN��\f�\u0002\u0010\\c\u0004+\u001b�����q��?[g]Y���@y�o`�ט9\u0017\u0010d�ڍ�1so�G�\u000bsf>\u0012��ҹ\u000fH�\u000eY�<��טyPT%rs��\" được định nghĩa/mô tả như thế nào?",
+      "option_a": "_�9�2�D;��Pǥu��uo���{�kL\u0016��Qѕ��wK�H�\\\\\u0012�\u0013_Y˘�[��r��\u0003X',�rBҷ��8#�&~���ў\"{k�����q|�(\u001b\u001c�\u0017���\\Z�\u0016Y������{,��9\\@�a\b���1LvY��h��i��.\u0011�3�������V�<\"?R1F�;-~ғs",
+      "option_b": "Một quy trình ngẫu nhiên không thuộc phạm vi của �6�,|�Xt\u0004Ƕ��\u000e��Z�\u0014��Dݢv\u001eOW�I('<�t��ƧGa=g�� c�\u0010��[�D����ԵF\u0001�s;Z��o֘�F]Ǜ���{7O���7���;���9#^��ώ\t\u000e\u0012�\u0018|����\u001a�,��XN��\f�\u0002\u0010\\c\u0004+\u001b�����q��?[g]Y���@y�o`�ט9\u0017\u0010d�ڍ�1so�G�\u000bsf>\u0012��ҹ\u000fH�\u000eY�<��טyPT%rs��.",
+      "option_c": "Là định lý toán học áp dụng riêng cho thuật toán tối ưu.",
+      "option_d": "Tập hợp các tham số không hợp lệ trong cấu hình hệ thống.",
+      "correct_ans": "A",
+      "explanation": "Trong tài liệu bài học có nêu rõ: \"�6�,|�Xt\u0004Ƕ��\u000e��Z�\u0014��Dݢv\u001eOW�I('<�t��ƧGa=g�� c�\u0010��[�D����ԵF\u0001�s;Z��o֘�F]Ǜ���{7O���7���;���9#^��ώ\t\u000e\u0012�\u0018|����\u001a�,��XN��\f�\u0002\u0010\\c\u0004+\u001b�����q��?[g]Y���@y�o`�ט9\u0017\u0010d�ڍ�1so�G�\u000bsf>\u0012��ҹ\u000fH�\u000eY�<��טyPT%rs��:_�9�2�D;��Pǥu��uo���{�kL\u0016��Qѕ��wK�H�\\\\\u0012�\u0013_Y˘�[��r��\u0003X',�rBҷ��8#�&~���ў\"{k�����q|�(\u001b\u001c�\u0017���\\Z�\u0016Y������{,��9\\@�a\b���1LvY��h��i��.\u0011�3�������V�<\"?R1F�;-~ғs%\u0018�������^����nh�k-WE]\u001b�y\"\u000e���\u001b��\u001e!7��g������ѩD�3\u0001��3�ܤ�\u001c}x&�\u001f�(j\u000eVm�d�db\u001f�H�\u000f\u000f,�\". Do đó đáp án A là câu trả lời chính xác nhất."
+    },
+    {
+      "id": "q_quiz_1788593151930_54vp_4",
+      "quiz_id": "quiz_1788593151930_54vp",
+      "question_text": "Theo tài liệu \"Buoi02_NenTangPHP_BienKieuDieuKhien.pptx\", khái niệm \"e4U�^Q_�\u0006�����IO��K�$�}a\u0001�\u001d�\u001e\u0016�E+3�l=L\u000f�\u0013�\u0018\u001c�EHs�\" được định nghĩa/mô tả như thế nào?",
+      "option_a": "��փ���\u0018cxM>\u001c\u001a\u001ar�!��˭*j\u000e4��\u001c.#��t\u000f�ȑ\u0010���O}��6��%fо\u001c���u��ل\u000e���7H\u0016������]�D�$8�mf�<�oh������'L��7ۡ��_ȋ9��_hx�`��*���\u0002�ƌ�\u001fCPX ���\u001c���\u0017��\f���1�\u001e\u001di\u001fߤ�x�d",
+      "option_b": "Một quy trình ngẫu nhiên không thuộc phạm vi của e4U�^Q_�\u0006�����IO��K�$�}a\u0001�\u001d�\u001e\u0016�E+3�l=L\u000f�\u0013�\u0018\u001c�EHs�.",
+      "option_c": "Là định lý toán học áp dụng riêng cho thuật toán tối ưu.",
+      "option_d": "Tập hợp các tham số không hợp lệ trong cấu hình hệ thống.",
+      "correct_ans": "A",
+      "explanation": "Trong tài liệu bài học có nêu rõ: \"e4U�^Q_�\u0006�����IO��K�$�}a\u0001�\u001d�\u001e\u0016�E+3�l=L\u000f�\u0013�\u0018\u001c�EHs�:��փ���\u0018cxM>\u001c\u001a\u001ar�!��˭*j\u000e4��\u001c.#��t\u000f�ȑ\u0010���O}��6��%fо\u001c���u��ل\u000e���7H\u0016������]�D�$8�mf�<�oh������'L��7ۡ��_ȋ9��_hx�`��*���\u0002�ƌ�\u001fCPX ���\u001c���\u0017��\f���1�\u001e\u001di\u001fߤ�x�d�*��c|�\u0016R�\u0005��xX\u000b\u0013��<N�jSڜ�/�g\u0010�-L�xz�]�EJՕK\u0006uz_�^\u001b\u0013ׂ�'U0Y\u000e��h��\u0002\u0001\t-\b�`�\u000b8��IH\u0005,'ן��t��Jp�,\\���_s��\u0002Y.V1�\u0004�#\u00192z�h��o�u�͔�\r@\tk�~`>��%�\u001a~R~\u001fs�.n�;\u0006����0'ś�\"\\���1��&;�\u0017�H���{���\u0015��!K8+\u001em�&}�ǹ\u001f�y�{c���'g.�_�\u0003S���e��m�\u000f�p`nK\u0017B�-\u0013~1���ǀk�P�\u0006�I\buT��{\u001aڸCsHnff\rtH+�\u0001T�+����\u001b�vSN��{J\u0012x\u0003\"o��\u0004m|�r�)���ʩ\u0018R\u0001��dcbP\\��\f?\u0019�\u0005`�\u001b\u0014����n�\u00020\u000e�w� ��\u0014\u0012\u0010�����$��\u0007��yޣx=_�=�\u00064���/�\u00174��aM�\u0006SG�%\u0015�X?\u0005vF�z�T�2�Ho\\�\u0005��\u0007E�[\u0016�tiE\u0001U�sX�$��)��n\u0007vP.��F�4�Co\u000fm���\". Do đó đáp án A là câu trả lời chính xác nhất."
+    },
+    {
+      "id": "q_quiz_1788593151930_54vp_5",
+      "quiz_id": "quiz_1788593151930_54vp",
+      "question_text": "Theo tài liệu \"Buoi02_NenTangPHP_BienKieuDieuKhien.pptx\", khái niệm \"\u0016\u0017\u0018\u0019\u001a%&'()*456789\" được định nghĩa/mô tả như thế nào?",
+      "option_a": "CDEFGHIJSTUVWXYZcdefghijstuvwxyz���������������������������������������������������������������������������\u0000\u001f\u0001\u0000\u0003\u0001\u0001\u0001\u0001\u0001\u0001\u0001\u0001\u0001\u0000\u0000\u0000\u0000\u0000\u0000\u0001\u0002\u0003\u0004\u0005\u0006\u0007\b",
+      "option_b": "Một quy trình ngẫu nhiên không thuộc phạm vi của \u0016\u0017\u0018\u0019\u001a%&'()*456789.",
+      "option_c": "Là định lý toán học áp dụng riêng cho thuật toán tối ưu.",
+      "option_d": "Tập hợp các tham số không hợp lệ trong cấu hình hệ thống.",
+      "correct_ans": "A",
+      "explanation": "Trong tài liệu bài học có nêu rõ: \"\u0016\u0017\u0018\u0019\u001a%&'()*456789:CDEFGHIJSTUVWXYZcdefghijstuvwxyz���������������������������������������������������������������������������\u0000\u001f\u0001\u0000\u0003\u0001\u0001\u0001\u0001\u0001\u0001\u0001\u0001\u0001\u0000\u0000\u0000\u0000\u0000\u0000\u0001\u0002\u0003\u0004\u0005\u0006\u0007\b\". Do đó đáp án A là câu trả lời chính xác nhất."
+    },
+    {
+      "id": "q_quiz_1788594341247_lw9c_1",
+      "quiz_id": "quiz_1788594341247_lw9c",
+      "question_text": "Trong khuôn khổ chuyên đề \"Kiến trúc mạng TCP/IP\", mục tiêu thiết kế và kiến trúc nào đóng vai trò CỐT LÕI?",
+      "option_a": "Bảo đảm tính toàn vẹn thông tin, chuẩn hóa giao thức và tính mô đun hóa cao của hệ thống.",
+      "option_b": "Chấp nhận rủi ro sai lệch dữ liệu để tối thiểu hóa thời gian tính toán.",
+      "option_c": "Triệt tiêu mọi ràng buộc toàn vẹn và cho phép ghi đè bộ nhớ tùy ý.",
+      "option_d": "Chỉ hỗ trợ môi trường phần cứng chuyên dụng không tương thích với các tiêu chuẩn mở.",
+      "correct_ans": "A",
+      "explanation": "Đối với chuyên đề \"Kiến trúc mạng TCP/IP\": Phương án A thể hiện đúng nguyên lý kỹ thuật chuẩn mực và được áp dụng trong thực tiễn."
+    },
+    {
+      "id": "q_quiz_1788594341247_lw9c_2",
+      "quiz_id": "quiz_1788594341247_lw9c",
+      "question_text": "Khi triển khai các quy tắc kỹ thuật trong \"Kiến trúc mạng TCP/IP\", quy chuẩn nào sau đây là BẮT BUỘC cần tuân thủ?",
+      "option_a": "Bỏ qua việc đóng kết nối và giải phóng tài nguyên sau khi hoàn tất phiên làm việc.",
+      "option_b": "Tuân thủ nghiêm ngặt định dạng cấu trúc, xử lý ngoại lệ và kiểm soát kiểu dữ liệu đầu vào.",
+      "option_c": "Cho phép truy cập trực tiếp tài nguyên nội bộ mà không cần phân quyền hay xác thực.",
+      "option_d": "Không ghi nhận nhật ký hoạt động (logs) khi có sự cố phát sinh trong hệ thống.",
+      "correct_ans": "B",
+      "explanation": "Đối với chuyên đề \"Kiến trúc mạng TCP/IP\": Phương án B thể hiện đúng nguyên lý kỹ thuật chuẩn mực và được áp dụng trong thực tiễn."
+    },
+    {
+      "id": "q_quiz_1788594341247_lw9c_3",
+      "quiz_id": "quiz_1788594341247_lw9c",
+      "question_text": "Đâu là điểm khác biệt căn bản giữa giải pháp được đề cập trong \"Kiến trúc mạng TCP/IP\" so với các mô hình truyền thống?",
+      "option_a": "Tăng mức độ phụ thuộc chặt chẽ (tight coupling) giữa các mô đun phần mềm.",
+      "option_b": "Loại bỏ hoàn toàn khả năng tương thích ngược với các phiên bản trước đó.",
+      "option_c": "Tối ưu hóa khả năng mở rộng, giảm độ trễ và phân tầng trách nhiệm rõ ràng giữa các thành phần.",
+      "option_d": "Buộc mọi tác vụ phải xử lý đồng bộ và khóa toàn bộ luồng chính của ứng dụng.",
+      "correct_ans": "C",
+      "explanation": "Đối với chuyên đề \"Kiến trúc mạng TCP/IP\": Phương án C thể hiện đúng nguyên lý kỹ thuật chuẩn mực và được áp dụng trong thực tiễn."
+    },
+    {
+      "id": "q_quiz_1788594341247_lw9c_4",
+      "quiz_id": "quiz_1788594341247_lw9c",
+      "question_text": "Phát biểu nào sau đây là KHÔNG CHÍNH XÁC (nhận định sai) khi đánh giá về nội dung chuyên môn trong \"Kiến trúc mạng TCP/IP\"?",
+      "option_a": "Hiệu năng và tính bảo mật là hai yếu tố song hành trong toàn bộ quy trình thiết kế.",
+      "option_b": "Các thành phần hệ thống cần được kiểm thử đơn vị và tích hợp trước khi đưa vào vận hành.",
+      "option_c": "Cơ chế xử lý được thiết kế để phát hiện sớm các bất thường và xung đột dữ liệu.",
+      "option_d": "Mọi thao tác dữ liệu đều có thể bỏ qua bước xác thực mà vẫn đảm bảo độ tin cậy tuyệt đối.",
+      "correct_ans": "D",
+      "explanation": "Đối với chuyên đề \"Kiến trúc mạng TCP/IP\": Phương án D thể hiện đúng nguyên lý kỹ thuật chuẩn mực và được áp dụng trong thực tiễn."
+    },
+    {
+      "id": "q_quiz_1788594375128_z8x9_1",
+      "quiz_id": "quiz_1788594375128_z8x9",
+      "question_text": "Trong khuôn khổ chuyên đề \"Kiến trúc mạng TCP/IP\", mục tiêu thiết kế và kiến trúc nào đóng vai trò CỐT LÕI?",
+      "option_a": "Bảo đảm tính toàn vẹn thông tin, chuẩn hóa giao thức và tính mô đun hóa cao của hệ thống.",
+      "option_b": "Chấp nhận rủi ro sai lệch dữ liệu để tối thiểu hóa thời gian tính toán.",
+      "option_c": "Triệt tiêu mọi ràng buộc toàn vẹn và cho phép ghi đè bộ nhớ tùy ý.",
+      "option_d": "Chỉ hỗ trợ môi trường phần cứng chuyên dụng không tương thích với các tiêu chuẩn mở.",
+      "correct_ans": "A",
+      "explanation": "Đối với chuyên đề \"Kiến trúc mạng TCP/IP\": Phương án A thể hiện đúng nguyên lý kỹ thuật chuẩn mực và được áp dụng trong thực tiễn."
+    },
+    {
+      "id": "q_quiz_1788594375128_z8x9_2",
+      "quiz_id": "quiz_1788594375128_z8x9",
+      "question_text": "Khi triển khai các quy tắc kỹ thuật trong \"Kiến trúc mạng TCP/IP\", quy chuẩn nào sau đây là BẮT BUỘC cần tuân thủ?",
+      "option_a": "Bỏ qua việc đóng kết nối và giải phóng tài nguyên sau khi hoàn tất phiên làm việc.",
+      "option_b": "Tuân thủ nghiêm ngặt định dạng cấu trúc, xử lý ngoại lệ và kiểm soát kiểu dữ liệu đầu vào.",
+      "option_c": "Cho phép truy cập trực tiếp tài nguyên nội bộ mà không cần phân quyền hay xác thực.",
+      "option_d": "Không ghi nhận nhật ký hoạt động (logs) khi có sự cố phát sinh trong hệ thống.",
+      "correct_ans": "B",
+      "explanation": "Đối với chuyên đề \"Kiến trúc mạng TCP/IP\": Phương án B thể hiện đúng nguyên lý kỹ thuật chuẩn mực và được áp dụng trong thực tiễn."
+    },
+    {
+      "id": "q_quiz_1788594375128_z8x9_3",
+      "quiz_id": "quiz_1788594375128_z8x9",
+      "question_text": "Đâu là điểm khác biệt căn bản giữa giải pháp được đề cập trong \"Kiến trúc mạng TCP/IP\" so với các mô hình truyền thống?",
+      "option_a": "Tăng mức độ phụ thuộc chặt chẽ (tight coupling) giữa các mô đun phần mềm.",
+      "option_b": "Loại bỏ hoàn toàn khả năng tương thích ngược với các phiên bản trước đó.",
+      "option_c": "Tối ưu hóa khả năng mở rộng, giảm độ trễ và phân tầng trách nhiệm rõ ràng giữa các thành phần.",
+      "option_d": "Buộc mọi tác vụ phải xử lý đồng bộ và khóa toàn bộ luồng chính của ứng dụng.",
+      "correct_ans": "C",
+      "explanation": "Đối với chuyên đề \"Kiến trúc mạng TCP/IP\": Phương án C thể hiện đúng nguyên lý kỹ thuật chuẩn mực và được áp dụng trong thực tiễn."
+    },
+    {
+      "id": "q_quiz_1788594375128_z8x9_4",
+      "quiz_id": "quiz_1788594375128_z8x9",
+      "question_text": "Phát biểu nào sau đây là KHÔNG CHÍNH XÁC (nhận định sai) khi đánh giá về nội dung chuyên môn trong \"Kiến trúc mạng TCP/IP\"?",
+      "option_a": "Hiệu năng và tính bảo mật là hai yếu tố song hành trong toàn bộ quy trình thiết kế.",
+      "option_b": "Các thành phần hệ thống cần được kiểm thử đơn vị và tích hợp trước khi đưa vào vận hành.",
+      "option_c": "Cơ chế xử lý được thiết kế để phát hiện sớm các bất thường và xung đột dữ liệu.",
+      "option_d": "Mọi thao tác dữ liệu đều có thể bỏ qua bước xác thực mà vẫn đảm bảo độ tin cậy tuyệt đối.",
+      "correct_ans": "D",
+      "explanation": "Đối với chuyên đề \"Kiến trúc mạng TCP/IP\": Phương án D thể hiện đúng nguyên lý kỹ thuật chuẩn mực và được áp dụng trong thực tiễn."
+    },
+    {
+      "id": "q_quiz_1788594375128_z8x9_5",
+      "quiz_id": "quiz_1788594375128_z8x9",
+      "question_text": "Về mặt an toàn và bảo mật, tài liệu \"Kiến trúc mạng TCP/IP\" khuyến nghị giải pháp hoặc thực hành chuẩn nào sau đây?",
+      "option_a": "Áp dụng nguyên tắc đặc quyền tối thiểu (Least Privilege) và mã hóa an toàn dữ liệu nhạy cảm.",
+      "option_b": "Lưu trữ thông tin xác thực dưới dạng văn bản thô (plaintext) trong tệp cấu hình công khai.",
+      "option_c": "Tắt toàn bộ cơ chế lọc dữ liệu (sanitization) để tăng thông lượng mạng.",
+      "option_d": "Không cập nhật các bản vá bảo mật định kỳ khi hệ thống đang vận hành.",
+      "correct_ans": "A",
+      "explanation": "Đối với chuyên đề \"Kiến trúc mạng TCP/IP\": Phương án A thể hiện đúng nguyên lý kỹ thuật chuẩn mực và được áp dụng trong thực tiễn."
+    },
+    {
+      "id": "q_quiz_1788609763923_3uj5_1",
+      "quiz_id": "quiz_1788609763923_3uj5",
+      "question_text": "Trong khuôn khổ chuyên đề \"Kiến trúc mạng TCP/IP\", mục tiêu thiết kế và kiến trúc nào đóng vai trò CỐT LÕI?",
+      "option_a": "Bảo đảm tính toàn vẹn thông tin, chuẩn hóa giao thức và tính mô đun hóa cao của hệ thống.",
+      "option_b": "Chấp nhận rủi ro sai lệch dữ liệu để tối thiểu hóa thời gian tính toán.",
+      "option_c": "Triệt tiêu mọi ràng buộc toàn vẹn và cho phép ghi đè bộ nhớ tùy ý.",
+      "option_d": "Chỉ hỗ trợ môi trường phần cứng chuyên dụng không tương thích với các tiêu chuẩn mở.",
+      "correct_ans": "A",
+      "explanation": "Đối với chuyên đề \"Kiến trúc mạng TCP/IP\": Phương án A thể hiện đúng nguyên lý kỹ thuật chuẩn mực và được áp dụng trong thực tiễn."
+    },
+    {
+      "id": "q_quiz_1788609763923_3uj5_2",
+      "quiz_id": "quiz_1788609763923_3uj5",
+      "question_text": "Khi triển khai các quy tắc kỹ thuật trong \"Kiến trúc mạng TCP/IP\", quy chuẩn nào sau đây là BẮT BUỘC cần tuân thủ?",
+      "option_a": "Bỏ qua việc đóng kết nối và giải phóng tài nguyên sau khi hoàn tất phiên làm việc.",
+      "option_b": "Tuân thủ nghiêm ngặt định dạng cấu trúc, xử lý ngoại lệ và kiểm soát kiểu dữ liệu đầu vào.",
+      "option_c": "Cho phép truy cập trực tiếp tài nguyên nội bộ mà không cần phân quyền hay xác thực.",
+      "option_d": "Không ghi nhận nhật ký hoạt động (logs) khi có sự cố phát sinh trong hệ thống.",
+      "correct_ans": "B",
+      "explanation": "Đối với chuyên đề \"Kiến trúc mạng TCP/IP\": Phương án B thể hiện đúng nguyên lý kỹ thuật chuẩn mực và được áp dụng trong thực tiễn."
+    },
+    {
+      "id": "q_quiz_1788609763923_3uj5_3",
+      "quiz_id": "quiz_1788609763923_3uj5",
+      "question_text": "Đâu là điểm khác biệt căn bản giữa giải pháp được đề cập trong \"Kiến trúc mạng TCP/IP\" so với các mô hình truyền thống?",
+      "option_a": "Tăng mức độ phụ thuộc chặt chẽ (tight coupling) giữa các mô đun phần mềm.",
+      "option_b": "Loại bỏ hoàn toàn khả năng tương thích ngược với các phiên bản trước đó.",
+      "option_c": "Tối ưu hóa khả năng mở rộng, giảm độ trễ và phân tầng trách nhiệm rõ ràng giữa các thành phần.",
+      "option_d": "Buộc mọi tác vụ phải xử lý đồng bộ và khóa toàn bộ luồng chính của ứng dụng.",
+      "correct_ans": "C",
+      "explanation": "Đối với chuyên đề \"Kiến trúc mạng TCP/IP\": Phương án C thể hiện đúng nguyên lý kỹ thuật chuẩn mực và được áp dụng trong thực tiễn."
+    },
+    {
+      "id": "q_quiz_1788609763923_3uj5_4",
+      "quiz_id": "quiz_1788609763923_3uj5",
+      "question_text": "Phát biểu nào sau đây là KHÔNG CHÍNH XÁC (nhận định sai) khi đánh giá về nội dung chuyên môn trong \"Kiến trúc mạng TCP/IP\"?",
+      "option_a": "Hiệu năng và tính bảo mật là hai yếu tố song hành trong toàn bộ quy trình thiết kế.",
+      "option_b": "Các thành phần hệ thống cần được kiểm thử đơn vị và tích hợp trước khi đưa vào vận hành.",
+      "option_c": "Cơ chế xử lý được thiết kế để phát hiện sớm các bất thường và xung đột dữ liệu.",
+      "option_d": "Mọi thao tác dữ liệu đều có thể bỏ qua bước xác thực mà vẫn đảm bảo độ tin cậy tuyệt đối.",
+      "correct_ans": "D",
+      "explanation": "Đối với chuyên đề \"Kiến trúc mạng TCP/IP\": Phương án D thể hiện đúng nguyên lý kỹ thuật chuẩn mực và được áp dụng trong thực tiễn."
+    },
+    {
+      "id": "q_quiz_1788609763923_3uj5_5",
+      "quiz_id": "quiz_1788609763923_3uj5",
+      "question_text": "Về mặt an toàn và bảo mật, tài liệu \"Kiến trúc mạng TCP/IP\" khuyến nghị giải pháp hoặc thực hành chuẩn nào sau đây?",
+      "option_a": "Áp dụng nguyên tắc đặc quyền tối thiểu (Least Privilege) và mã hóa an toàn dữ liệu nhạy cảm.",
+      "option_b": "Lưu trữ thông tin xác thực dưới dạng văn bản thô (plaintext) trong tệp cấu hình công khai.",
+      "option_c": "Tắt toàn bộ cơ chế lọc dữ liệu (sanitization) để tăng thông lượng mạng.",
+      "option_d": "Không cập nhật các bản vá bảo mật định kỳ khi hệ thống đang vận hành.",
+      "correct_ans": "A",
+      "explanation": "Đối với chuyên đề \"Kiến trúc mạng TCP/IP\": Phương án A thể hiện đúng nguyên lý kỹ thuật chuẩn mực và được áp dụng trong thực tiễn."
+    },
+    {
+      "id": "q_quiz_1788609778701_38yq_1",
+      "quiz_id": "quiz_1788609778701_38yq",
+      "question_text": "Trong mô hình TCP/IP, lớp nào chịu trách nhiệm trực tiếp cho việc định tuyến các gói tin (datagrams) từ nguồn đến đích thông qua các mạng liên kết khác nhau?",
+      "option_a": "Lớp Ứng dụng (Application Layer) quản lý các phiên truyền tải dữ liệu giữa các tiến trình.",
+      "option_b": "Lớp Internet (Internet Layer) thực hiện chức năng chọn đường và chuyển tiếp gói tin dựa trên địa chỉ IP.",
+      "option_c": "Lớp Truy cập mạng (Network Access Layer) đảm bảo tính toàn vẹn của dữ liệu trên đường truyền vật lý.",
+      "option_d": "Lớp Giao vận (Transport Layer) đảm bảo việc phân mảnh và tái lập các luồng dữ liệu end-to-end.",
+      "correct_ans": "B",
+      "explanation": "Lớp Internet trong mô hình TCP/IP đóng vai trò cốt lõi trong việc định tuyến (routing) và xử lý các gói tin IP, giúp chúng vượt qua các mạng con khác nhau để đến đích."
+    },
+    {
+      "id": "q_quiz_1788609778701_38yq_2",
+      "quiz_id": "quiz_1788609778701_38yq",
+      "question_text": "Khi so sánh giữa giao thức TCP và UDP trong kiến trúc TCP/IP, phát biểu nào sau đây phản ánh chính xác bản chất kỹ thuật của chúng?",
+      "option_a": "TCP cung cấp cơ chế điều khiển luồng và kiểm soát lỗi, trong khi UDP tập trung vào tốc độ truyền tải bằng cách lược bỏ các thủ tục bắt tay.",
+      "option_b": "Cả TCP và UDP đều yêu cầu thiết lập kết nối logic trước khi truyền dữ liệu để đảm bảo tính sẵn sàng của thiết bị đích.",
+      "option_c": "UDP được thiết kế để thay thế TCP trong các ứng dụng yêu cầu độ tin cậy tuyệt đối và thứ tự gói tin nghiêm ngặt.",
+      "option_d": "TCP sử dụng cơ chế truyền tin không kết nối (connectionless) để giảm thiểu độ trễ trong các ứng dụng thời gian thực.",
+      "correct_ans": "A",
+      "explanation": "TCP là giao thức hướng kết nối, tin cậy, trong khi UDP là giao thức không kết nối, ưu tiên hiệu năng và độ trễ thấp, phù hợp cho các ứng dụng như truyền phát video hoặc VoIP."
+    },
+    {
+      "id": "q_quiz_1788609778701_38yq_3",
+      "quiz_id": "quiz_1788609778701_38yq",
+      "question_text": "Tại sao việc phân tách kiến trúc mạng thành các lớp (layering) lại là một nguyên tắc thiết kế quan trọng trong bộ giao thức TCP/IP?",
+      "option_a": "Để loại bỏ hoàn toàn sự phụ thuộc vào các thiết bị phần cứng của các nhà sản xuất khác nhau.",
+      "option_b": "Để cho phép các lớp hoạt động độc lập, nơi mỗi lớp chỉ cần cung cấp dịch vụ cho lớp trên và sử dụng dịch vụ của lớp dưới.",
+      "option_c": "Để tăng cường tốc độ xử lý dữ liệu bằng cách giảm số lượng các gói tin điều khiển trong quá trình đóng gói.",
+      "option_d": "Để đảm bảo rằng mọi giao thức trong cùng một lớp phải sử dụng chung một thuật toán mã hóa dữ liệu.",
+      "correct_ans": "B",
+      "explanation": "Tính phân lớp (layering) giúp cô lập các chức năng, cho phép thay đổi hoặc nâng cấp giao thức ở một lớp mà không làm ảnh hưởng đến các lớp khác, tạo sự linh hoạt trong phát triển mạng."
+    },
+    {
+      "id": "q_quiz_1788609778701_38yq_4",
+      "quiz_id": "quiz_1788609778701_38yq",
+      "question_text": "Phát biểu nào sau đây là KHÔNG CHÍNH XÁC khi mô tả về quá trình đóng gói dữ liệu (encapsulation) trong mô hình TCP/IP?",
+      "option_a": "Dữ liệu từ lớp Ứng dụng được thêm vào các thông tin điều khiển (header) khi đi xuống lớp Giao vận.",
+      "option_b": "Mỗi lớp trong mô hình TCP/IP đều thêm một phần tiêu đề (header) vào đơn vị dữ liệu nhận được từ lớp trên.",
+      "option_c": "Quá trình đóng gói dữ liệu chỉ xảy ra tại thiết bị nguồn, trong khi thiết bị đích chỉ thực hiện quá trình giải đóng gói (decapsulation).",
+      "option_d": "Đơn vị dữ liệu tại lớp Internet được gọi là Segment, trong khi đơn vị dữ liệu tại lớp Truy cập mạng được gọi là Frame.",
+      "correct_ans": "D",
+      "explanation": "Tại lớp Internet, đơn vị dữ liệu được gọi là Packet (hoặc Datagram), không phải Segment. Segment là đơn vị dữ liệu tại lớp Giao vận (TCP)."
+    },
+    {
+      "id": "q_quiz_1788609778701_38yq_5",
+      "quiz_id": "quiz_1788609778701_38yq",
+      "question_text": "Trong kịch bản truyền dữ liệu qua mạng, nếu một gói tin bị mất trên đường truyền, giao thức nào trong bộ TCP/IP sẽ chịu trách nhiệm phát hiện và yêu cầu truyền lại?",
+      "option_a": "Giao thức IP tại lớp Internet sẽ tự động gửi lại gói tin nếu phát hiện lỗi checksum.",
+      "option_b": "Giao thức TCP tại lớp Giao vận sẽ sử dụng cơ chế xác nhận (ACK) và định thời (timeout) để xử lý việc mất gói.",
+      "option_c": "Giao thức Ethernet tại lớp Truy cập mạng sẽ thực hiện kiểm tra lại dữ liệu và yêu cầu truyền lại từ nút mạng gần nhất.",
+      "option_d": "Giao thức UDP tại lớp Giao vận sẽ tự động điều chỉnh cửa sổ truyền để tránh mất gói trong tương lai.",
+      "correct_ans": "B",
+      "explanation": "TCP cung cấp cơ chế tin cậy thông qua việc đánh số thứ tự và xác nhận dữ liệu (ACK). Nếu bên gửi không nhận được ACK trong khoảng thời gian quy định, nó sẽ thực hiện truyền lại."
+    }
+  ],
+  "quiz_attempts": [],
+  "quiz_answers": [],
+  "learning_progress": [
+    {
+      "id": "prog_student_01",
+      "user_id": "usr_student_01",
+      "total_documents": 2,
+      "total_questions_asked": 16,
+      "total_quizzes_completed": 0,
+      "average_score": 0,
+      "last_active_at": "2026-09-05T07:31:40.542Z"
+    },
+    {
+      "id": "prog_usr_1788607787985_5e85u",
+      "user_id": "usr_1788607787985_5e85u",
+      "total_documents": 0,
+      "total_questions_asked": 0,
+      "total_quizzes_completed": 0,
+      "average_score": 0,
+      "last_active_at": "2026-09-05T11:29:48.082Z"
+    }
+  ]
+}
