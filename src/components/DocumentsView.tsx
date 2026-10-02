@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { DocumentItem, DocumentSummary } from '../types';
+import { DocumentItem, DocumentSummary, User } from '../types';
 import { api } from '../services/api';
 import {
   UploadCloud,
@@ -16,12 +16,15 @@ import {
   Eye,
   BookOpen,
   X,
-  FileSpreadsheet
+  FileSpreadsheet,
+  LogIn
 } from 'lucide-react';
 
 interface DocumentsViewProps {
   documents: DocumentItem[];
   loading: boolean;
+  user?: User | null;
+  onOpenAuth?: () => void;
   onRefresh: () => void;
   onSelectDocumentForChat: (doc: DocumentItem) => void;
   onSelectDocumentForQuiz: (doc: DocumentItem) => void;
@@ -30,6 +33,8 @@ interface DocumentsViewProps {
 export const DocumentsView: React.FC<DocumentsViewProps> = ({
   documents,
   loading,
+  user,
+  onOpenAuth,
   onRefresh,
   onSelectDocumentForChat,
   onSelectDocumentForQuiz
@@ -59,7 +64,6 @@ export const DocumentsView: React.FC<DocumentsViewProps> = ({
   const [summaryDoc, setSummaryDoc] = useState<DocumentItem | null>(null);
   const [summaryData, setSummaryData] = useState<DocumentSummary | null>(null);
   const [summaryLoading, setSummaryLoading] = useState(false);
-  const [summaryType, setSummaryType] = useState<'bullet' | 'short' | 'detailed'>('bullet');
 
   // Auto-dismiss notification
   useEffect(() => {
@@ -88,9 +92,9 @@ export const DocumentsView: React.FC<DocumentsViewProps> = ({
       return;
     }
     const ext = selected.name.split('.').pop()?.toLowerCase() || '';
-    const allowed = ['pdf', 'docx', 'doc', 'txt', 'md', 'markdown', 'rtf'];
+    const allowed = ['pdf', 'docx', 'doc', 'pptx', 'ppt', 'txt', 'md', 'markdown', 'rtf'];
     if (ext && !allowed.includes(ext)) {
-      setUploadError(`Định dạng .${ext} không được hỗ trợ. Vui lòng tải file PDF, DOCX, TXT hoặc MD.`);
+      setUploadError(`Định dạng .${ext} không được hỗ trợ. Vui lòng tải file PDF, DOCX, PPTX, TXT hoặc MD.`);
       return;
     }
     setUploadError(null);
@@ -126,8 +130,13 @@ export const DocumentsView: React.FC<DocumentsViewProps> = ({
 
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!user) {
+      setUploadError('Bạn cần đăng nhập để tải tài liệu lên hệ thống.');
+      if (onOpenAuth) onOpenAuth();
+      return;
+    }
     if (!file) {
-      setUploadError('Vui lòng chọn tệp tài liệu (PDF, TXT, DOCX, MD).');
+      setUploadError('Vui lòng chọn tệp tài liệu (PDF, TXT, DOCX, PPTX, MD).');
       return;
     }
     setUploadLoading(true);
@@ -184,12 +193,11 @@ export const DocumentsView: React.FC<DocumentsViewProps> = ({
     }
   };
 
-  const handleOpenSummary = async (doc: DocumentItem, type: 'bullet' | 'short' | 'detailed' = 'bullet') => {
+  const handleOpenSummary = async (doc: DocumentItem) => {
     setSummaryDoc(doc);
-    setSummaryType(type);
     setSummaryLoading(true);
     try {
-      const res = await api.summarizeDocument(doc.id, type);
+      const res = await api.summarizeDocument(doc.id, 'detailed');
       setSummaryData(res);
     } catch (err: any) {
       setNotification({
@@ -241,7 +249,14 @@ export const DocumentsView: React.FC<DocumentsViewProps> = ({
         </div>
         <button
           id="open-upload-modal-btn"
-          onClick={() => setIsUploadOpen(true)}
+          onClick={() => {
+            if (!user && onOpenAuth) {
+              onOpenAuth();
+              return;
+            }
+            setUploadError(null);
+            setIsUploadOpen(true);
+          }}
           className="px-4 py-2.5 bg-orange-500 hover:bg-orange-600 active:bg-orange-700 text-white text-xs sm:text-sm font-semibold rounded-xl shadow-md shadow-orange-100 flex items-center justify-center gap-2 transition-all cursor-pointer"
         >
           <UploadCloud className="w-4 h-4" />
@@ -371,11 +386,11 @@ export const DocumentsView: React.FC<DocumentsViewProps> = ({
                   </button>
                   <button
                     id={`summary-action-btn-${doc.id}`}
-                    onClick={() => handleOpenSummary(doc, 'bullet')}
+                    onClick={() => handleOpenSummary(doc)}
                     className="py-1.5 px-2 bg-sky-50 hover:bg-sky-100 text-sky-700 text-xs font-semibold rounded-xl flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
                   >
                     <BookOpen className="w-3.5 h-3.5 text-sky-600" />
-                    <span>Tóm tắt bài</span>
+                    <span>Tóm tắt nội dung</span>
                   </button>
                 </div>
 
@@ -589,49 +604,16 @@ export const DocumentsView: React.FC<DocumentsViewProps> = ({
               </button>
             </div>
 
-            {/* Type selector */}
-            <div className="flex items-center gap-2 py-3 border-b border-slate-100">
-              <span className="text-xs text-slate-500 font-medium">Chế độ tóm tắt:</span>
-              {(['bullet', 'short', 'detailed'] as const).map((t) => (
-                <button
-                  key={t}
-                  onClick={() => handleOpenSummary(summaryDoc, t)}
-                  disabled={summaryLoading}
-                  className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
-                    summaryType === t ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                  }`}
-                >
-                  {t === 'bullet' ? 'Gạch đầu dòng' : t === 'short' ? 'Ngắn gọn' : 'Chuyên sâu'}
-                </button>
-              ))}
-            </div>
-
             <div className="flex-1 overflow-y-auto py-4 text-xs text-slate-800 space-y-4 leading-relaxed">
               {summaryLoading ? (
                 <div className="text-center py-12">
                   <div className="w-8 h-8 border-3 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
-                  <p className="text-xs text-slate-600 font-medium">Aura AI đang đọc và cô đọng nội dung bài giảng...</p>
+                  <p className="text-xs text-slate-600 font-medium">Aura AI đang đọc và phân tích chuyên sâu nội dung bài giảng...</p>
                 </div>
               ) : summaryData ? (
                 <div className="space-y-4">
-                  {summaryData.key_concepts && summaryData.key_concepts.length > 0 && (
-                    <div className="p-3 bg-blue-50/70 border border-blue-100 rounded-xl">
-                      <p className="font-bold text-blue-950 text-xs mb-1.5 flex items-center gap-1.5">
-                        <Sparkles className="w-3.5 h-3.5 text-blue-600" />
-                        Các khái niệm cốt lõi (Key Concepts):
-                      </p>
-                      <div className="flex flex-wrap gap-1.5">
-                        {summaryData.key_concepts.map((c, i) => (
-                          <span key={i} className="px-2 py-0.5 bg-white border border-blue-200 text-blue-800 rounded-md text-[11px] font-medium">
-                            {c}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
                   <div className="p-4 bg-slate-50 rounded-xl border border-slate-200/80">
-                    <p className="font-semibold text-slate-800 text-xs mb-2">Bản tóm tắt bài giảng:</p>
+                    <p className="font-semibold text-slate-800 text-xs mb-2">Bản tóm tắt chuyên sâu:</p>
                     <div className="whitespace-pre-wrap text-slate-700 leading-relaxed text-xs">
                       {summaryData.summary}
                     </div>
@@ -645,6 +627,23 @@ export const DocumentsView: React.FC<DocumentsViewProps> = ({
                           <li key={i} className="flex items-start gap-2 text-xs text-slate-700">
                             <span className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5 shrink-0"></span>
                             <span>{b}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {summaryData.exam_tips && summaryData.exam_tips.length > 0 && (
+                    <div className="p-3.5 bg-amber-50/80 border border-amber-200/80 rounded-xl">
+                      <p className="font-bold text-amber-900 text-xs mb-2 flex items-center gap-1.5">
+                        <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+                        Điểm mấu chốt ôn thi (Exam Tips):
+                      </p>
+                      <ul className="space-y-1.5">
+                        {summaryData.exam_tips.map((tip, i) => (
+                          <li key={i} className="flex items-start gap-2 text-xs text-amber-950">
+                            <span className="w-1.5 h-1.5 rounded-full bg-amber-500 mt-1.5 shrink-0"></span>
+                            <span>{tip}</span>
                           </li>
                         ))}
                       </ul>

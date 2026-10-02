@@ -300,7 +300,8 @@ quizRouter.post('/:id/submit', authenticateToken, async (req: AuthRequest, res: 
           selected_option: r.selected_option,
           correct_ans: r.question.correct_ans,
           is_correct: r.is_correct,
-          explanation: r.question.explanation
+          explanation: r.question.explanation,
+          concept_tested: r.question.concept_tested
         }))
       }
     });

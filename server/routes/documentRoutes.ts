@@ -156,9 +156,20 @@ documentRouter.post('/upload', authenticateToken, handleUploadFile, async (req: 
       });
     }
 
-    const title = (req.body.title || path.parse(file.originalname).name).trim();
+    // Normalize UTF-8 file name in case multer parsed with latin1
+    let originalName = file.originalname;
+    try {
+      const decodedName = Buffer.from(file.originalname, 'latin1').toString('utf8');
+      if (decodedName && !decodedName.includes('')) {
+        originalName = decodedName;
+      }
+    } catch {
+      originalName = file.originalname;
+    }
+
+    const title = (req.body.title || path.parse(originalName).name).trim();
     const subject = (req.body.subject || 'Chung').trim();
-    const fileExt = path.extname(file.originalname).toLowerCase().replace('.', '');
+    const fileExt = path.extname(originalName).toLowerCase().replace('.', '') || 'bin';
 
     const docId = `doc_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
     const uploadsDir = path.join(process.cwd(), 'uploads');
@@ -166,7 +177,7 @@ documentRouter.post('/upload', authenticateToken, handleUploadFile, async (req: 
       fs.mkdirSync(uploadsDir, { recursive: true });
     }
 
-    const safeFileName = `${docId}_${file.originalname.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
+    const safeFileName = `${docId}_${Date.now()}.${fileExt}`;
     const filePath = path.join(uploadsDir, safeFileName);
     fs.writeFileSync(filePath, file.buffer);
 
@@ -177,7 +188,7 @@ documentRouter.post('/upload', authenticateToken, handleUploadFile, async (req: 
     try {
       extractedText = await extractTextFromFile(file.buffer, fileExt);
       if (!extractedText || extractedText.trim().length === 0) {
-        extractedText = `Tài liệu: ${title} (Nội dung trích xuất từ tệp ${file.originalname})`;
+        extractedText = `Tài liệu: ${title} (Nội dung trích xuất từ tệp ${originalName})`;
       }
     } catch (parseErr) {
       console.warn('Extraction warning:', parseErr);
@@ -185,13 +196,20 @@ documentRouter.post('/upload', authenticateToken, handleUploadFile, async (req: 
     }
 
     const chunks = splitIntoChunks(extractedText, 600, 100);
+    if (chunks.length === 0) {
+      chunks.push({
+        chunk_index: 0,
+        content: extractedText.slice(0, 600) || `Tài liệu: ${title}`,
+        char_count: Math.min(extractedText.length, 600)
+      });
+    }
 
     const newDoc: Document = {
       id: docId,
       user_id: user.id,
       title,
       subject,
-      file_name: file.originalname,
+      file_name: originalName,
       file_type: fileExt,
       file_size: file.size,
       file_path: `/uploads/${safeFileName}`,
@@ -246,6 +264,7 @@ documentRouter.post('/upload', authenticateToken, handleUploadFile, async (req: 
         file_type: newDoc.file_type,
         file_size: newDoc.file_size,
         status: newDoc.status,
+        chunk_count: chunks.length,
         chunks_created: chunks.length,
         created_at: newDoc.created_at
       }

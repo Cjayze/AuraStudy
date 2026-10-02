@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { GoogleGenAI } from '@google/genai';
 import { getDb, Document, Question, Quiz, ensureDocumentCleanText } from './db';
 
@@ -7,6 +8,7 @@ let geminiClient: GoogleGenAI | null = null;
 function getGeminiClient(): GoogleGenAI | null {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey || apiKey === 'MY_GEMINI_API_KEY' || apiKey.trim() === '') {
+    console.warn('[QuizGenerator] Chưa tìm thấy GEMINI_API_KEY. Vui lòng cấu hình file .env để dùng Gemini AI.');
     return null;
   }
   if (!geminiClient) {
@@ -25,6 +27,7 @@ export interface GeneratedQuestionItem {
   option_d: string;
   correct_ans: 'A' | 'B' | 'C' | 'D';
   explanation: string;
+  concept_tested?: string;
 }
 
 export interface GenerateQuizResult {
@@ -161,72 +164,75 @@ export async function generateQuizFromDocument(options: {
 
   if (ai && sanitizedContent.trim().length > 0) {
     const prompt = `
-Dưới đây là tài liệu chuyên môn bài học:
+Dưới đây là nội dung trọng tâm từ tài liệu học tập:
 ---
-TIÊU ĐỀ BÀI HỌC: ${doc.title}
-MÔN HỌC: ${doc.subject || 'Công nghệ thông tin'}
-NỘI DUNG TÀI LIỆU:
-${sanitizedContent.slice(0, 12000)}
+TIÊU ĐỀ TÀI LIỆU: ${doc.title}
+MÔN HỌC / CHUYÊN NGÀNH: ${doc.subject || 'Công nghệ thông tin'}
+NỘI DUNG TÀI LIỆU NGUỒN:
+${sanitizedContent.slice(0, 14000)}
 ---
 
-YÊU CẦU BIÊN SOẠN ĐỀ THI TRẮC NGHIỆM CHUYÊN NGHIỆP:
-- Số lượng câu hỏi: CHÍNH XÁC ${questionCount} câu hỏi trắc nghiệm (mỗi câu gồm 4 phương án lựa chọn A, B, C, D).
-- Độ khó: ${difficulty.toUpperCase()} (${difficultyDesc})
-${customTopic ? `- Trọng tâm chủ đề cần tập trung: ${customTopic}` : ''}
+YÊU CẦU THIẾT KẾ ĐỀ THI TRẮC NGHIỆM CHUẨN NOTEBOOKLM:
+- Số lượng câu hỏi: CHÍNH XÁC ${questionCount} câu hỏi trắc nghiệm khách quan (mỗi câu 4 phương án A, B, C, D).
+- Mức độ đánh giá: ${difficulty.toUpperCase()} (${difficultyDesc})
+${customTopic ? `- Tập trung trọng tâm vào chuyên đề: ${customTopic}` : ''}
 
-QUY TẮC ĐẶC BIỆT QUAN TRỌNG (TUÂN THỦ TUYỆT ĐỐI):
-1. AI TỰ BIÊN SOẠN 100% CÂU HỎI VÀ CẢ 4 PHƯƠNG ÁN ĐÁP ÁN:
-   - TUYỆT ĐỐI KHÔNG cắt vụn, chắp vá hay copy nguyên si các câu gạch đầu dòng trong tài liệu (làm như vậy trông rất nghiệp dư và thô sơ).
-   - Hãy đóng vai trò Giảng viên Đại học / Chuyên gia Khảo thí: Đọc hiểu bản chất kiến thức trong bài giảng, sau đó TỰ HÀNH VĂN, TỰ ĐẶT CÂU HỎI và TỰ VIẾT các phương án trả lời bằng câu văn hoàn chỉnh, gãy gọn, chuẩn sư phạm.
-   - Cả 4 phương án A, B, C, D phải là các câu diễn đạt hoàn chỉnh, ngữ pháp chuẩn mực, cùng độ dài và phong cách biểu đạt.
-   - Phương án gây nhiễu (distractors) phải do AI tự sáng tác một cách thông minh, logic, có tính phân loại cao (nghe rất hợp lý nhưng sai về nguyên tắc kỹ thuật hoặc phạm vi áp dụng), tránh các phương án ngô nghê.
-2. LOẠI BỎ TRIỆT ĐỂ THÔNG TIN BÌA VÀ THỦ TỤC HÀNH CHÍNH:
-   - Tuyệt đối KHÔNG hỏi về: Tên trường, tên khoa, tên giảng viên, tác giả, email, số điện thoại, mã môn học, số tín chỉ, số tiết, số thứ tự slide hay danh mục giáo trình.
-   - Tập trung 100% vào kiến thức chuyên môn: Cơ chế hoạt động, cú pháp, thuật toán, phân tích đoạn mã, so sánh giải pháp, xử lý ngoại lệ và best practices.
-3. ĐA DẠNG HÓA HÌNH THỨC CÂU HỎI:
-   - Câu hỏi tình huống / Đoạn mã: "Xem xét đoạn mã / cú pháp sau, kết quả thực thi hoặc hành vi của hệ thống là gì?"
-   - Câu hỏi so sánh / Phân biệt: "Điểm khác biệt cốt lõi giữa cơ chế X và cơ chế Y là gì?"
-   - Câu hỏi nhận diện khẳng định SAI / Bẫy tư duy: "Phát biểu nào sau đây là KHÔNG CHÍNH XÁC khi nói về...?"
-   - Câu hỏi thực hành chuẩn mực (Best Practice): "Để tối ưu hóa bảo mật / hiệu năng trong trường hợp này, giải pháp khuyến nghị là gì?"
-4. PHÂN PHỐI ĐÁP ÁN VÀ GIẢI THÍCH CHI TIẾT:
-   - Phân bố đồng đều và ngẫu nhiên vị trí đáp án đúng ('A', 'B', 'C', 'D'), không dồn vào một phương án duy nhất.
-   - 'explanation': Phân tích chi tiết tại sao đáp án đúng lại chính xác, giải thích ngắn gọn nguyên nhân các phương án còn lại chưa đúng.
+QUY TẮC BẮT BUỘC TUÂN THỦ (NOTEBOOKLM STUDY GUIDE STANDARD):
+1. TUYỆT ĐỐI KHÔNG SỬ DỤNG CÁC CỤM TỪ RẬP KHUÔN ĐẦU CÂU:
+   - NGHIÊM CẤM bắt đầu câu hỏi bằng: "Theo tài liệu...", "Từ tài liệu...", "Dựa vào bài học...", "Theo như...", "Trong tài liệu...", "Bài giảng đề cập...".
+   - Hãy đặt câu hỏi trực diện, sắc sảo, tự nhiên như đề thi đại học chính quy hoặc đề thi chứng chỉ quốc tế uy tín (AWS, Cisco, Oracle, CompTIA).
 
-TRẢ VỀ DUY NHẤT ĐỊNH DẠNG JSON (không thêm markdown ngoài JSON) theo cấu trúc:
+2. ĐA DẠNG HÓA HÌNH THỨC CÂU HỎI TRỌNG TÂM:
+   - Dạng Cơ chế & Tiến trình (How it works): Tập trung vào nguyên lý vận hành, thứ tự các bước kỹ thuật, vai trò chức năng của từng thành phần.
+   - Dạng Phân tích So sánh (Comparative): Phân biệt sự khác nhau cốt lõi giữa hai khái niệm, cơ chế hoặc giải pháp trong bài.
+   - Dạng Tình huống & Ứng dụng (Scenario / Problem Solving): Đưa ra ngữ cảnh bài toán kỹ thuật thực tế và hỏi giải pháp tối ưu.
+   - Dạng Bẫy tư duy / Phát biểu Sai (Exception / Negative): "Phát biểu nào sau đây là KHÔNG CHÍNH XÁC khi nói về...", "Nhận định nào sai lệch về...".
+   - Dạng Quy chuẩn & Best Practice: Các nguyên tắc thiết kế, tối ưu hóa và chuẩn mực kiến trúc.
+
+3. ĐÁP ÁN CÓ TÍNH LOGIC CAO VÀ CÂN BẰNG (TUYỆT ĐỐI KHÔNG CẮT VỤN CÂU CHỮ TỪ TÀI LIỆU):
+   - Cả 4 phương án A, B, C, D phải là câu văn hoặc mệnh đề hoàn chỉnh, mạch lạc, có cùng cấu trúc ngữ pháp và độ dài tương đương nhau.
+   - CÁC ĐÁP ÁN SAI (DISTRACTORS) PHẢI CÓ TÍNH HỢP LÝ VÀ PHÂN LOẠI CAO: Phải là những phương án gây nhiễu thông minh, đại diện cho những ngộ nhận kỹ thuật phổ biến, điều kiện nghịch đảo hoặc hoán đổi vai trò các thành phần liên quan. TUYỆT ĐỐI KHÔNG cắt tạm một câu bất kỳ từ tài liệu hoặc đưa vào đáp án vô nghĩa.
+
+4. GIẢI THÍCH CHI TIẾT & CHỦ ĐỀ ĐÁNH GIÁ (CHUẨN NOTEBOOKLM):
+   - "explanation": Nêu rõ vì sao đáp án đúng là chính xác, đồng thời phân tích ngắn gọn lý do các phương án còn lại là sai (chỉ ra sai ở điểm nào hoặc đang mô tả khái niệm nào khác).
+   - "concept_tested": Khái niệm hoặc chủ đề trọng tâm được kiểm tra trong câu hỏi.
+
+TRẢ VỀ DUY NHẤT ĐỊNH DẠNG JSON (không kèm bất kỳ văn bản nào ngoài JSON):
 {
-  "title": "Tiêu đề đề thi trắc nghiệm học thuật và súc tích",
+  "title": "Tiêu đề đề thi trắc nghiệm học thuật súc tích",
   "questions": [
     {
-      "question_text": "Nội dung câu hỏi được AI tự biên soạn hoàn chỉnh...",
+      "question_text": "Nội dung câu hỏi trực diện, sắc sảo...",
       "option_a": "Phương án A hoàn chỉnh, trau chuốt",
       "option_b": "Phương án B hoàn chỉnh, trau chuốt",
       "option_c": "Phương án C hoàn chỉnh, trau chuốt",
       "option_d": "Phương án D hoàn chỉnh, trau chuốt",
       "correct_ans": "A",
-      "explanation": "Giải thích sư phạm cặn kẽ về bản chất kiến thức..."
+      "concept_tested": "Tên khái niệm kỹ thuật cốt lõi",
+      "explanation": "Giải thích chi tiết theo chuẩn NotebookLM vì sao đáp án này đúng và các đáp án khác sai..."
     }
   ]
 }
 `;
 
-    // gemini-3.1-flash-lite is prioritized for ultra-fast generation and active free-tier quota
-    const candidateModels = ['gemini-3.1-flash-lite', 'gemini-3.8-flash', 'gemini-flash-latest'];
+    // Prioritize gemini-3.1-flash-lite (fast, highly available) with fallback hierarchy
+    const candidateModels = ['gemini-3.1-flash-lite', 'gemini-flash-latest', 'gemini-3.8-flash', 'gemini-3.1-pro-preview'];
 
     for (const modelName of candidateModels) {
       if (questionItems.length >= questionCount) break;
 
       try {
         const timeoutPromise = new Promise<never>((_, reject) =>
-          setTimeout(() => reject(new Error(`Timeout quá 20 giây khi gọi model ${modelName}`)), 20000)
+          setTimeout(() => reject(new Error(`Timeout quá 25 giây khi gọi model ${modelName}`)), 25000)
         );
 
         const geminiPromise = ai.models.generateContent({
           model: modelName,
           contents: prompt,
           config: {
-            systemInstruction: 'Bạn là chuyên gia khảo thí và sư phạm đại học cao cấp. Bạn tự biên soạn 100% câu hỏi và cả 4 đáp án theo phong cách đề thi quốc tế, tuyệt đối không cắt ghép câu chữ thô sơ từ tài liệu.',
+            systemInstruction: 'Bạn là chuyên gia sư phạm và khảo thí cao cấp của Google NotebookLM. Bạn thiết kế 100% câu hỏi và cả 4 đáp án theo chuẩn khảo thí quốc tế, tuyệt đối không dùng từ mở đầu rập khuôn và không cắt ghép câu chữ thô sơ từ tài liệu.',
             responseMimeType: 'application/json',
-            temperature: 0.35
+            temperature: 0.3
           }
         });
 
@@ -246,21 +252,32 @@ TRẢ VỀ DUY NHẤT ĐỊNH DẠNG JSON (không thêm markdown ngoài JSON) th
                      !text.includes('email') &&
                      !text.includes('mã môn') &&
                      !text.includes('tín chỉ') &&
-                     !text.includes('số tiết');
+                     !text.includes('số tiết') &&
+                     !text.startsWith('theo tài liệu') &&
+                     !text.startsWith('từ tài liệu') &&
+                     !text.startsWith('theo như tài liệu');
             });
 
             if (validQuestions.length > 0) {
-              questionItems = validQuestions.map((q: any) => ({
-                question_text: String(q.question_text || 'Câu hỏi kiến thức chuyên môn'),
-                option_a: String(q.option_a || 'Phương án A'),
-                option_b: String(q.option_b || 'Phương án B'),
-                option_c: String(q.option_c || 'Phương án C'),
-                option_d: String(q.option_d || 'Phương án D'),
-                correct_ans: ['A', 'B', 'C', 'D'].includes(q.correct_ans?.toUpperCase())
-                  ? (q.correct_ans.toUpperCase() as 'A' | 'B' | 'C' | 'D')
-                  : 'A',
-                explanation: String(q.explanation || 'Đáp án chính xác theo nguyên lý bài học.')
-              }));
+              questionItems = validQuestions.map((q: any) => {
+                let cleanAns: 'A' | 'B' | 'C' | 'D' = 'A';
+                const rawAns = String(q.correct_ans || 'A').toUpperCase().trim();
+                if (rawAns === 'A' || rawAns === 'OPTION_A' || rawAns === '1') cleanAns = 'A';
+                else if (rawAns === 'B' || rawAns === 'OPTION_B' || rawAns === '2') cleanAns = 'B';
+                else if (rawAns === 'C' || rawAns === 'OPTION_C' || rawAns === '3') cleanAns = 'C';
+                else if (rawAns === 'D' || rawAns === 'OPTION_D' || rawAns === '4') cleanAns = 'D';
+
+                return {
+                  question_text: String(q.question_text || 'Câu hỏi kiến thức chuyên môn'),
+                  option_a: String(q.option_a || 'Phương án A'),
+                  option_b: String(q.option_b || 'Phương án B'),
+                  option_c: String(q.option_c || 'Phương án C'),
+                  option_d: String(q.option_d || 'Phương án D'),
+                  correct_ans: cleanAns,
+                  concept_tested: String(q.concept_tested || doc.subject || 'Kiến thức trọng tâm'),
+                  explanation: String(q.explanation || 'Đáp án chính xác theo nguyên lý bài học.')
+                };
+              });
               break; // Successfully obtained questions from AI!
             }
           }
@@ -303,7 +320,8 @@ TRẢ VỀ DUY NHẤT ĐỊNH DẠNG JSON (không thêm markdown ngoài JSON) th
     option_c: q.option_c,
     option_d: q.option_d,
     correct_ans: q.correct_ans,
-    explanation: q.explanation
+    explanation: q.explanation,
+    concept_tested: q.concept_tested || 'Kiến thức trọng tâm'
   }));
 
   db.quizzes.unshift(newQuiz);
@@ -316,11 +334,11 @@ TRẢ VỀ DUY NHẤT ĐỊNH DẠNG JSON (không thêm markdown ngoài JSON) th
 }
 
 /**
- * Enhanced, diversified heuristic generator that:
+ * Enhanced, diversified heuristic generator designed for NotebookLM standards:
  * 1. Strictly filters out titles, personal names, university names, emails, and header metadata.
- * 2. Focuses exclusively on core technical and conceptual assertions.
- * 3. Rotates across 6 distinct question templates for high variety.
- * 4. Generates plausible distractors from authentic material.
+ * 2. Focuses exclusively on core technical and conceptual assertions from the document.
+ * 3. Never uses boilerplate phrases like "Theo tài liệu...", "Trong tài liệu...", "Trong chuyên đề kỹ thuật...".
+ * 4. Generates plausible, logically coherent distractors with parallel grammatical structure.
  * 5. Randomly distributes the correct answer across A, B, C, D.
  */
 function generateHeuristicQuestions(
@@ -361,14 +379,6 @@ function generateHeuristicQuestions(
       let conceptCandidate = parts[0].replace(/^[-*•\d\.\s]+/, '').trim();
       const defCandidate = (splitWord.trim() + ' ' + parts.slice(1).join(splitWord)).trim();
 
-      // If concept candidate starts with demonstrative words like "Đây là tài liệu về X"
-      if (conceptCandidate.toLowerCase().startsWith('đây là tài liệu') || conceptCandidate.toLowerCase().startsWith('tài liệu')) {
-        const matchTopic = line.match(/(?:về|nghiên cứu|chuyên đề)\s+([^,.:]+)/i);
-        if (matchTopic && matchTopic[1]) {
-          conceptCandidate = matchTopic[1].trim();
-        }
-      }
-
       if (
         isAcademicConcept(conceptCandidate) &&
         defCandidate.length > 15 &&
@@ -383,48 +393,51 @@ function generateHeuristicQuestions(
     }
   }
 
-  // Pool of authentic technical definitions to form realistic distractors
-  const definitionPool = candidateConcepts.map(c => c.definition);
-
   const questions: GeneratedQuestionItem[] = [];
 
-  // Question archetypes to diversify phrasing
+  // Question archetypes: Natural, direct question stems (NO "Theo tài liệu...")
   const questionTemplates = [
     {
-      format: (concept: string) => `Trong chuyên đề kỹ thuật, mục đích hoặc vai trò cốt lõi của "${concept}" là gì?`,
-      correctPrefix: 'Mục đích chính là ',
-      distractor1: (otherDef: string) => otherDef.slice(0, 140),
-      distractor2: () => 'Chỉ có tác dụng chú thích tạm thời và bị trình biên dịch bỏ qua trong runtime.',
-      distractor3: () => 'Yêu cầu quyền quản trị root và không thể khởi tạo trong môi trường người dùng thông thường.'
+      format: (concept: string) => `Đặc tính kỹ thuật nào sau đây mô tả ĐÚNG NHẤT về bản chất của "${concept}"?`,
+      generateDistractors: (concept: string) => [
+        `Chỉ cho phép thực thi trong chế độ đơn luồng và không thể mở rộng quy mô.`,
+        `Yêu cầu khóa hoàn toàn tài nguyên hệ thống trong suốt thời gian xử lý.`,
+        `Tự động hủy bỏ tiến trình ngay khi xuất hiện sự thay đổi trạng thái mạng.`
+      ]
     },
     {
-      format: (concept: string) => `Đặc điểm hoặc nguyên lý hoạt động nào sau đây mô tả ĐÚNG về "${concept}"?`,
-      correctPrefix: 'Đặc tính quan trọng: ',
-      distractor1: (otherDef: string) => otherDef.slice(0, 140),
-      distractor2: () => 'Tự động giải phóng bộ nhớ mà không cần tuân thủ bất kỳ phạm vi biến (scope) nào.',
-      distractor3: () => 'Luôn làm chậm thời gian xử lý do phải chuyển đổi kiểu ngầm định liên tục.'
+      format: (concept: string) => `Trong kiến trúc hệ thống, vai trò hoặc mục đích cốt lõi của "${concept}" là gì?`,
+      generateDistractors: (concept: string) => [
+        `Đóng vai trò thay thế hoàn toàn hệ điều hành cục bộ ở tầng vật lý.`,
+        `Chuyển đổi dữ liệu sang định dạng nhị phân thô mà không áp dụng giao thức kiểm tra lỗi.`,
+        `Ngăn chặn hoàn toàn việc trao đổi thông điệp bất đồng bộ giữa các tiến trình.`
+      ]
     },
     {
-      format: (concept: string) => `Khi triển khai mã nguồn liên quan đến "${concept}", khẳng định nào sau đây là CHUẨN XÁC?`,
-      correctPrefix: 'Khẳng định chuẩn: ',
-      distractor1: (otherDef: string) => otherDef.slice(0, 140),
-      distractor2: () => 'Không được hỗ trợ trong các kiến trúc ứng dụng web hiện đại.',
-      distractor3: () => 'Không tuân thủ các quy chuẩn lập trình hướng đối tượng và bảo mật dữ liệu.'
-    },
-    {
-      format: (concept: string) => `Đâu là điểm khác biệt hoặc phát biểu KHÔNG CHÍNH XÁC (phát biểu sai) khi nói về "${concept}"?`,
+      format: (concept: string) => `Phát biểu nào sau đây là KHÔNG CHÍNH XÁC (phát biểu sai) khi nói về "${concept}"?`,
       isNegative: true,
-      negativeCorrect: (concept: string) => `Cho rằng "${concept}" không có bất kỳ ràng buộc nào về kiểu dữ liệu hay cú pháp.`,
-      distractor1: (def: string) => def.slice(0, 140),
-      distractor2: () => 'Là một thành phần được chuẩn hóa trong tài liệu kỹ thuật của bài học.',
-      distractor3: () => 'Đóng vai trò quan trọng trong việc xây dựng luồng logic chương trình.'
+      negativeCorrect: (concept: string) => `Mọi yêu cầu xử lý liên quan đến "${concept}" đều bị bỏ qua kiểm tra hợp lệ mà vẫn bảo đảm tuyệt đối tính an toàn.`,
+      generateDistractors: (concept: string) => [
+        `Có thể được tích hợp vào các giải pháp phần mềm hiện đại nhằm tối ưu hóa hiệu năng.`,
+        `Tuân thủ các nguyên tắc thiết kế phân tầng và chuẩn hóa giao tiếp kỹ thuật.`,
+        `Đóng vai trò quan trọng trong việc bảo đảm tính toàn vẹn và nhất quán của luồng dữ liệu.`
+      ]
     },
     {
-      format: (concept: string) => `Trong thực tế phát triển phần mềm, giải pháp nào được khuyến nghị (Best Practice) khi áp dụng "${concept}"?`,
-      correctPrefix: 'Thực hành khuyến nghị: Áp dụng theo nguyên tắc ',
-      distractor1: (otherDef: string) => otherDef.slice(0, 140),
-      distractor2: () => 'Bỏ qua việc kiểm tra tính hợp lệ dữ liệu đầu vào để tối đa hóa tốc độ.',
-      distractor3: () => 'Thay thế toàn bộ các cấu trúc xử lý ngoại lệ bằng việc bỏ qua cảnh báo lỗi.'
+      format: (concept: string) => `Khi triển khai thực tế, giải pháp nào sau đây thể hiện đúng quy chuẩn (Best Practice) đối với "${concept}"?`,
+      generateDistractors: (concept: string) => [
+        `Bỏ qua việc bắt và xử lý ngoại lệ để tối đa hóa tốc độ phản hồi.`,
+        `Cấu hình quyền truy cập root không giới hạn cho mọi tiến trình bên ngoài.`,
+        `Lưu trữ cấu hình nhạy cảm dưới dạng văn bản thô không mã hóa.`
+      ]
+    },
+    {
+      format: (concept: string) => `Cơ chế nào sau đây là yếu tố phân biệt căn bản của "${concept}" so với các phương thức truyền thống?`,
+      generateDistractors: (concept: string) => [
+        `Không hỗ trợ cơ chế giải phóng bộ nhớ tự động sau khi kết thúc tác vụ.`,
+        `Làm gia tăng độ phụ thuộc chặt chẽ giữa các thành phần phần mềm.`,
+        `Bắt buộc client phải chờ đợi vô hạn mà không có cơ chế timeout.`
+      ]
     }
   ];
 
@@ -438,41 +451,32 @@ function generateHeuristicQuestions(
     const template = questionTemplates[templateIndex];
 
     const questionText = template.format(item.concept);
-
-    // Pick distractors from pool
-    const otherDefs = definitionPool.filter(d => d !== item.definition);
-    const altDef1 = otherDefs[questions.length % (otherDefs.length || 1)] ||
-      'Là cơ chế kiểm soát phiên làm việc người dùng thông qua mã thông báo JWT.';
-    const altDef2 = otherDefs[(questions.length + 1) % (otherDefs.length || 1)] ||
-      'Quy trình nén dữ liệu nhằm giảm tải băng thông đường truyền mạng.';
-
-    let correctText = '';
-    let dist1 = '';
-    let dist2 = '';
-    let dist3 = '';
-
     const cleanDef = item.definition.replace(/^[–\-:•\s]+/, '').trim();
     const formattedDef = cleanDef.charAt(0).toUpperCase() + cleanDef.slice(1);
+    const correctStatement = formattedDef.endsWith('.') ? formattedDef : formattedDef + '.';
+
+    let correctText = '';
+    let distractors: string[] = [];
 
     if (template.isNegative && template.negativeCorrect) {
       correctText = template.negativeCorrect(item.concept);
-      dist1 = formattedDef.endsWith('.') ? formattedDef : formattedDef + '.';
-      dist2 = template.distractor2();
-      dist3 = template.distractor3();
+      distractors = [
+        correctStatement,
+        template.generateDistractors(item.concept)[0],
+        template.generateDistractors(item.concept)[1]
+      ];
     } else {
-      correctText = formattedDef.endsWith('.') ? formattedDef : formattedDef + '.';
-      dist1 = template.distractor1(altDef1);
-      dist2 = template.distractor2();
-      dist3 = altDef2.endsWith('.') ? altDef2 : altDef2 + '.';
+      correctText = correctStatement;
+      distractors = template.generateDistractors(item.concept);
     }
 
     // Distribute correct answer evenly across A, B, C, D
     const shift = questions.length % 4; // 0 -> A, 1 -> B, 2 -> C, 3 -> D
     const optionsRaw = [
       { text: correctText, isCorrect: true },
-      { text: dist1, isCorrect: false },
-      { text: dist2, isCorrect: false },
-      { text: dist3, isCorrect: false }
+      { text: distractors[0], isCorrect: false },
+      { text: distractors[1], isCorrect: false },
+      { text: distractors[2], isCorrect: false }
     ];
 
     const shifted = [
@@ -491,77 +495,66 @@ function generateHeuristicQuestions(
       option_c: shifted[2].text,
       option_d: shifted[3].text,
       correct_ans: correctLetter,
-      explanation: `Khái niệm "${item.concept}" được định nghĩa chuẩn xác: ${correctText}. Các phương án còn lại là các mệnh đề gây nhiễu không phản ánh đúng nguyên lý kỹ thuật này.`
+      concept_tested: item.concept,
+      explanation: `Nguyên lý chuẩn mực của "${item.concept}": ${correctText}. Các phương án còn lại là nhận định gây nhiễu không đúng với kiến thức chuyên môn.`
     });
   }
 
-  // Rich secondary questions pool: 6 diverse, distinct pedagogical inquiry formats
-  const secondaryQuestionArchetypes = [
+  // If still need more questions, create high-yield conceptual questions from the core document topic
+  const coreConceptTopic = docTitle.replace(/\.[^.]+$/, '').trim();
+  const fallbackArchetypes = [
     {
-      stem: (title: string) => `Trong khuôn khổ chuyên đề "${title}", mục tiêu thiết kế và kiến trúc nào đóng vai trò CỐT LÕI?`,
-      correct: 'Bảo đảm tính toàn vẹn thông tin, chuẩn hóa giao thức và tính mô đun hóa cao của hệ thống.',
-      d1: 'Chấp nhận rủi ro sai lệch dữ liệu để tối thiểu hóa thời gian tính toán.',
-      d2: 'Triệt tiêu mọi ràng buộc toàn vẹn và cho phép ghi đè bộ nhớ tùy ý.',
-      d3: 'Chỉ hỗ trợ môi trường phần cứng chuyên dụng không tương thích với các tiêu chuẩn mở.'
+      q: `Mục tiêu kỹ thuật then chốt của kiến trúc trong bài học "${coreConceptTopic}" là gì?`,
+      ans: `Bảo đảm tính mô đun hóa cao, phân tầng trách nhiệm rõ ràng và tối ưu hóa hiệu năng truyền thông.`,
+      d: [
+        `Gia tăng sự phụ thuộc chặt chẽ giữa các thành phần để giảm dung lượng bộ nhớ.`,
+        `Loại bỏ cơ chế kiểm tra tính toàn vẹn thông tin nhằm tối thiểu hóa độ trễ xử lý.`,
+        `Bắt buộc mọi tiến trình ứng dụng phải thực thi đồng bộ và khóa tài nguyên chia sẻ.`
+      ],
+      concept: 'Kiến trúc & Mục tiêu thiết kế'
     },
     {
-      stem: (title: string) => `Khi triển khai các quy tắc kỹ thuật trong "${title}", quy chuẩn nào sau đây là BẮT BUỘC cần tuân thủ?`,
-      correct: 'Tuân thủ nghiêm ngặt định dạng cấu trúc, xử lý ngoại lệ và kiểm soát kiểu dữ liệu đầu vào.',
-      d1: 'Bỏ qua việc đóng kết nối và giải phóng tài nguyên sau khi hoàn tất phiên làm việc.',
-      d2: 'Cho phép truy cập trực tiếp tài nguyên nội bộ mà không cần phân quyền hay xác thực.',
-      d3: 'Không ghi nhận nhật ký hoạt động (logs) khi có sự cố phát sinh trong hệ thống.'
+      q: `Phương châm thực hành tốt nhất (Best Practice) khi xây dựng giải pháp kỹ thuật là gì?`,
+      ans: `Bắt và xử lý ngoại lệ một cách an toàn, ghi nhận log đầy đủ và kiểm soát chặt chẽ điều kiện biên.`,
+      d: [
+        `Cho phép tiến trình ngầm định bỏ qua các cảnh báo lỗi để duy trì luồng vận hành.`,
+        `Lưu trữ thông tin cấu hình nhạy cảm dưới dạng văn bản thô để tiện tra cứu.`,
+        `Tắt cơ chế xác thực người dùng khi hệ thống hoạt động ở chế độ tải cao.`
+      ],
+      concept: 'Quy chuẩn Best Practice'
     },
     {
-      stem: (title: string) => `Đâu là điểm khác biệt căn bản giữa giải pháp được đề cập trong "${title}" so với các mô hình truyền thống?`,
-      correct: 'Tối ưu hóa khả năng mở rộng, giảm độ trễ và phân tầng trách nhiệm rõ ràng giữa các thành phần.',
-      d1: 'Loại bỏ hoàn toàn khả năng tương thích ngược với các phiên bản trước đó.',
-      d2: 'Tăng mức độ phụ thuộc chặt chẽ (tight coupling) giữa các mô đun phần mềm.',
-      d3: 'Buộc mọi tác vụ phải xử lý đồng bộ và khóa toàn bộ luồng chính của ứng dụng.'
-    },
-    {
-      stem: (title: string) => `Phát biểu nào sau đây là KHÔNG CHÍNH XÁC (nhận định sai) khi đánh giá về nội dung chuyên môn trong "${title}"?`,
-      correct: 'Mọi thao tác dữ liệu đều có thể bỏ qua bước xác thực mà vẫn đảm bảo độ tin cậy tuyệt đối.',
-      d1: 'Các thành phần hệ thống cần được kiểm thử đơn vị và tích hợp trước khi đưa vào vận hành.',
-      d2: 'Cơ chế xử lý được thiết kế để phát hiện sớm các bất thường và xung đột dữ liệu.',
-      d3: 'Hiệu năng và tính bảo mật là hai yếu tố song hành trong toàn bộ quy trình thiết kế.'
-    },
-    {
-      stem: (title: string) => `Về mặt an toàn và bảo mật, tài liệu "${title}" khuyến nghị giải pháp hoặc thực hành chuẩn nào sau đây?`,
-      correct: 'Áp dụng nguyên tắc đặc quyền tối thiểu (Least Privilege) và mã hóa an toàn dữ liệu nhạy cảm.',
-      d1: 'Lưu trữ thông tin xác thực dưới dạng văn bản thô (plaintext) trong tệp cấu hình công khai.',
-      d2: 'Tắt toàn bộ cơ chế lọc dữ liệu (sanitization) để tăng thông lượng mạng.',
-      d3: 'Không cập nhật các bản vá bảo mật định kỳ khi hệ thống đang vận hành.'
-    },
-    {
-      stem: (title: string) => `Khi hệ thống xử lý các điều kiện biên hoặc phát sinh ngoại lệ trong "${title}", hành vi chuẩn mực là gì?`,
-      correct: 'Bắt và xử lý ngoại lệ an toàn, ghi nhận log chi tiết và thông báo trạng thái lỗi rõ ràng.',
-      d1: 'Đột ngột dừng tiến trình và để lộ toàn bộ thông tin ngăn xếp (stack trace) ra người dùng.',
-      d2: 'Bỏ qua lỗi ngầm định và tiếp tục xử lý với các giá trị rác không xác định.',
-      d3: 'Xóa toàn bộ cơ sở dữ liệu hiện tại để tự động khởi động lại từ đầu.'
+      q: `Nhận định nào sau đây là KHÔNG ĐÚNG về nguyên lý vận hành của hệ thống?`,
+      ans: `Mọi tiến trình đều có thể truy cập trực tiếp bộ nhớ của tiến trình khác mà không cần cơ chế đồng bộ.`,
+      d: [
+        `Hệ thống cần cung cấp các giao diện lập trình chuẩn hóa (API) để các mô đun trao đổi dữ liệu.`,
+        `Việc xử lý lỗi kịp thời giúp ngăn ngừa sự cố lan truyền trong toàn bộ kiến trúc.`,
+        `Hiệu năng và tính bảo mật là hai tiêu chí quan trọng cần được cân bằng khi thiết kế.`
+      ],
+      concept: 'Nguyên lý hệ thống'
     }
   ];
 
   while (questions.length < count) {
     const qIndex = questions.length;
-    const archetype = secondaryQuestionArchetypes[qIndex % secondaryQuestionArchetypes.length];
-
+    const arch = fallbackArchetypes[qIndex % fallbackArchetypes.length];
     const correctAnsLetter = (['A', 'B', 'C', 'D'] as const)[qIndex % 4];
-    const options = [archetype.correct, archetype.d1, archetype.d2, archetype.d3];
+    const options = [arch.ans, arch.d[0], arch.d[1], arch.d[2]];
 
-    // Rotate options so correct is at correctAnsLetter
     const targetIdx = ['A', 'B', 'C', 'D'].indexOf(correctAnsLetter);
     const temp = options[0];
     options[0] = options[targetIdx];
     options[targetIdx] = temp;
 
     questions.push({
-      question_text: archetype.stem(docTitle),
+      question_text: arch.q,
       option_a: options[0],
       option_b: options[1],
       option_c: options[2],
       option_d: options[3],
       correct_ans: correctAnsLetter,
-      explanation: `Đối với chuyên đề "${docTitle}": Phương án ${correctAnsLetter} thể hiện đúng nguyên lý kỹ thuật chuẩn mực và được áp dụng trong thực tiễn.`
+      concept_tested: arch.concept,
+      explanation: `Phương án ${correctAnsLetter} là khẳng định chuẩn xác: ${arch.ans}`
     });
   }
 

@@ -16,41 +16,53 @@ function getAuthHeader(): Record<string, string> {
 }
 
 async function handleResponse<T>(res: Response): Promise<T> {
+  const text = await res.text().catch(() => '');
   let data: any = null;
-  const contentType = res.headers.get('content-type') || '';
 
-  if (contentType.includes('application/json')) {
+  if (text) {
     try {
-      data = await res.json();
+      data = JSON.parse(text);
     } catch {
       data = null;
     }
+  }
+
+  if (res.status === 401 || res.status === 403) {
+    localStorage.removeItem('aurastudy_token');
+    localStorage.removeItem('aurastudy_user');
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('aurastudy:unauthorized'));
+    }
+    const errMsg = data?.message || data?.error || 'Phiên đăng nhập đã hết hạn hoặc bạn chưa đăng nhập. Vui lòng đăng nhập để tiếp tục.';
+    throw new Error(errMsg);
   }
 
   if (!res.ok) {
     if (data && (data.message || data.error)) {
       throw new Error(data.message || data.error);
     }
-    if (res.status === 401 || res.status === 403) {
-      localStorage.removeItem('aurastudy_token');
-      localStorage.removeItem('aurastudy_user');
-      throw new Error('Phiên làm việc đã hết hạn hoặc không hợp lệ. Vui lòng làm mới trang.');
-    }
     if (res.status === 413) {
       throw new Error('Tệp tải lên vượt quá dung lượng tối đa 25MB.');
     }
-    const rawText = await res.text().catch(() => '');
-    if (rawText && !rawText.includes('<!DOCTYPE') && !rawText.includes('<html')) {
-      throw new Error(rawText.slice(0, 150));
+    if (text && !text.includes('<!DOCTYPE') && !text.includes('<html')) {
+      throw new Error(text.slice(0, 150));
     }
     throw new Error(`Yêu cầu không thành công (Mã lỗi: ${res.status}). Vui lòng thử lại.`);
   }
 
-  if (data === null) {
-    throw new Error('Phản hồi từ máy chủ không đúng định dạng dữ liệu.');
+  if (data !== null) {
+    return (data.data !== undefined ? data.data : data) as T;
   }
 
-  return data.data !== undefined ? data.data : data;
+  if (text && !text.includes('<!DOCTYPE') && !text.includes('<html')) {
+    return { message: text } as T;
+  }
+
+  if (text.includes('<!DOCTYPE') || text.includes('<html')) {
+    throw new Error('Máy chủ phản hồi trang web thay vì dữ liệu JSON. Vui lòng thử lại.');
+  }
+
+  return {} as T;
 }
 
 export const api = {
@@ -122,6 +134,14 @@ export const api = {
   },
 
   uploadDocument: async (file: File, title: string, subject: string): Promise<DocumentItem> => {
+    const token = localStorage.getItem('aurastudy_token');
+    if (!token) {
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('aurastudy:unauthorized'));
+      }
+      throw new Error('Bạn cần đăng nhập để tải tài liệu lên hệ thống.');
+    }
+
     const formData = new FormData();
     formData.append('file', file);
     formData.append('title', title);

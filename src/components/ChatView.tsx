@@ -36,11 +36,6 @@ export const ChatView: React.FC<ChatViewProps> = ({
       content:
         'Xin chào! Tôi là **Aura AI**, trợ lý học tập được hỗ trợ bởi mô hình Gemini và kỹ thuật RAG (Retrieval-Augmented Generation).\n\nTôi có thể giúp bạn giải đáp thắc mắc chuyên sâu, tra cứu kiến thức chuẩn xác từ các tài liệu bạn đã tải lên, tóm tắt bài giảng hoặc gợi ý câu hỏi ôn tập!',
       timestamp: new Date().toISOString(),
-      suggested_questions: [
-        'Chuẩn hóa CSDL là gì và tại sao cần đưa về 3NF?',
-        'Giải thích 4 tính chất ACID trong hệ quản trị CSDL',
-        'Mô hình OSI 7 tầng gồm những tầng nào?'
-      ]
     }
   ]);
 

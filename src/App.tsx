@@ -27,6 +27,13 @@ export default function App() {
   // Initialize User with verification
   useEffect(() => {
     const initAuth = async () => {
+      // Purge any stored student demo session
+      const savedUserStr = localStorage.getItem('aurastudy_user');
+      if (savedUserStr && savedUserStr.includes('student@aurastudy.edu.vn')) {
+        localStorage.removeItem('aurastudy_token');
+        localStorage.removeItem('aurastudy_user');
+      }
+
       const isLoggedOut = localStorage.getItem('aurastudy_logged_out') === 'true';
       const savedToken = localStorage.getItem('aurastudy_token');
       if (savedToken) {
@@ -34,6 +41,7 @@ export default function App() {
           const currentUser = await api.getCurrentUser();
           setUser(currentUser);
           localStorage.setItem('aurastudy_user', JSON.stringify(currentUser));
+          setLoading(false);
           return;
         } catch {
           // Token expired, invalidated or server state reset
@@ -42,19 +50,10 @@ export default function App() {
         }
       }
 
-      if (isLoggedOut) {
-        setLoading(false);
-        return;
-      }
-
-      // Auto-login with default student credentials on first visit for seamless experience
-      try {
-        const res = await api.login('student@aurastudy.edu.vn', 'Password123@');
-        localStorage.setItem('aurastudy_token', res.access_token);
-        localStorage.setItem('aurastudy_user', JSON.stringify(res.user));
-        setUser(res.user);
-      } catch (err) {
-        console.warn('Auto-login error:', err);
+      setLoading(false);
+      // If user has no active token and hasn't explicitly logged out, show auth modal
+      if (!isLoggedOut) {
+        setIsAuthOpen(true);
       }
     };
 
@@ -86,6 +85,16 @@ export default function App() {
       fetchData();
     }
   }, [user, fetchData]);
+
+  // Listen for unauthorized events to prompt login
+  useEffect(() => {
+    const handleUnauthorized = () => {
+      setUser(null);
+      setIsAuthOpen(true);
+    };
+    window.addEventListener('aurastudy:unauthorized', handleUnauthorized);
+    return () => window.removeEventListener('aurastudy:unauthorized', handleUnauthorized);
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem('aurastudy_token');
@@ -142,6 +151,8 @@ export default function App() {
             <DocumentsView
               documents={documents}
               loading={loading}
+              user={user}
+              onOpenAuth={() => setIsAuthOpen(true)}
               onRefresh={fetchData}
               onSelectDocumentForChat={handleSelectDocForChat}
               onSelectDocumentForQuiz={handleSelectDocForQuiz}

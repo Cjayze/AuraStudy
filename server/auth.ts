@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import { getDb, User } from './db';
 import { adminAuth } from '../src/lib/firebase-admin.ts';
+import { findUserById } from '../src/db/users.ts';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'aurastudy-super-secret-jwt-key-2026';
 const JWT_EXPIRES_IN = '7d';
@@ -48,7 +49,30 @@ export async function authenticateToken(req: AuthRequest, res: Response, next: N
   try {
     const decoded = jwt.verify(token, JWT_SECRET) as { id: string };
     const db = getDb();
-    const user = db.users.find(u => u.id === decoded.id && u.is_active);
+    let user = db.users.find(u => u.id === decoded.id && u.is_active);
+
+    if (!user) {
+      // Lookup user in Supabase in case server memory was reset
+      try {
+        const sbUser = await findUserById(decoded.id);
+        if (sbUser && (sbUser.isActive ?? true)) {
+          user = {
+            id: sbUser.id,
+            email: sbUser.email,
+            password_hash: sbUser.passwordHash || '',
+            full_name: sbUser.fullName || sbUser.email,
+            role: (sbUser.role === 'admin' ? 'admin' : 'student') as 'student' | 'admin',
+            avatar_url: sbUser.avatarUrl || '',
+            school: sbUser.school || '',
+            is_active: true,
+            created_at: sbUser.createdAt ? new Date(sbUser.createdAt).toISOString() : new Date().toISOString()
+          };
+          db.users.push(user);
+        }
+      } catch (sbErr) {
+        console.warn('Supabase auth fallback warning:', sbErr);
+      }
+    }
 
     if (user) {
       req.user = user;

@@ -82,6 +82,7 @@ export interface Question {
   option_d: string;
   correct_ans: 'A' | 'B' | 'C' | 'D';
   explanation: string;
+  concept_tested?: string;
 }
 
 export interface QuizAttempt {
@@ -137,19 +138,7 @@ if (!fs.existsSync(DATA_DIR)) {
 // Initial Seed Data generator
 function initializeSeedData(): DatabaseState {
   const salt = bcrypt.genSaltSync(10);
-  const studentHash = bcrypt.hashSync('Password123@', salt);
   const adminHash = bcrypt.hashSync('Admin123@', salt);
-
-  const studentUser: User = {
-    id: 'usr_student_01',
-    email: 'student@aurastudy.edu.vn',
-    password_hash: studentHash,
-    full_name: 'Nguyễn Văn An',
-    role: 'student',
-    avatar_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
-    is_active: true,
-    created_at: new Date(Date.now() - 7 * 86400000).toISOString()
-  };
 
   const adminUser: User = {
     id: 'usr_admin_01',
@@ -185,7 +174,7 @@ Chuẩn hóa dữ liệu là quá trình tổ chức lại các bảng và thu�
 
   const doc1: Document = {
     id: doc1Id,
-    user_id: studentUser.id,
+    user_id: adminUser.id,
     title: 'Hệ Quản Trị CSDL - Chương 5: Chuẩn Hóa Dữ Liệu & ACID',
     subject: 'Cơ sở dữ liệu',
     file_name: 'Database_Normalization_ACID.pdf',
@@ -215,7 +204,7 @@ Chuẩn hóa dữ liệu là quá trình tổ chức lại các bảng và thu�
 
   const doc2: Document = {
     id: doc2Id,
-    user_id: studentUser.id,
+    user_id: adminUser.id,
     title: 'Mạng Máy Tính - Mô hình OSI 7 Tầng & TCP/IP',
     subject: 'Mạng máy tính',
     file_name: 'Computer_Networks_OSI_TCP.pdf',
@@ -275,7 +264,7 @@ Chuẩn hóa dữ liệu là quá trình tổ chức lại các bảng và thu�
   const quiz1: Quiz = {
     id: quiz1Id,
     document_id: doc1Id,
-    user_id: studentUser.id,
+    user_id: adminUser.id,
     title: 'Kiểm tra Chuẩn hóa CSDL & ACID (5 câu)',
     difficulty: 'medium',
     total_questions: 5,
@@ -343,7 +332,7 @@ Chuẩn hóa dữ liệu là quá trình tổ chức lại các bảng và thu�
   const attempt1: QuizAttempt = {
     id: 'att_01',
     quiz_id: quiz1Id,
-    user_id: studentUser.id,
+    user_id: adminUser.id,
     score: 100,
     correct_count: 5,
     total_questions: 5,
@@ -352,8 +341,8 @@ Chuẩn hóa dữ liệu là quá trình tổ chức lại các bảng và thu�
   };
 
   const progress: LearningProgress = {
-    id: 'prog_student_01',
-    user_id: studentUser.id,
+    id: `prog_${adminUser.id}`,
+    user_id: adminUser.id,
     total_documents: 2,
     total_questions_asked: 14,
     total_quizzes_completed: 1,
@@ -362,7 +351,7 @@ Chuẩn hóa dữ liệu là quá trình tổ chức lại các bảng và thu�
   };
 
   return {
-    users: [studentUser, adminUser],
+    users: [adminUser],
     documents: [doc1, doc2],
     document_chunks: [...doc1Chunks, ...doc2Chunks],
     chat_sessions: [],
@@ -387,6 +376,19 @@ export function getDb(): DatabaseState {
     try {
       const data = fs.readFileSync(DB_FILE, 'utf-8');
       db = JSON.parse(data);
+      if (db) {
+        // Purge any legacy demo student account
+        db.users = (db.users || []).filter(u => u.id !== 'usr_student_01' && u.email !== 'student@aurastudy.edu.vn');
+        db.learning_progress = (db.learning_progress || []).filter(p => p.user_id !== 'usr_student_01');
+        db.quiz_attempts = (db.quiz_attempts || []).filter(a => a.user_id !== 'usr_student_01');
+        db.chat_sessions = (db.chat_sessions || []).filter(s => s.user_id !== 'usr_student_01');
+        (db.documents || []).forEach(d => {
+          if (d.user_id === 'usr_student_01') d.user_id = 'usr_admin_01';
+        });
+        (db.quizzes || []).forEach(q => {
+          if (q.user_id === 'usr_student_01') q.user_id = 'usr_admin_01';
+        });
+      }
     } catch (e) {
       console.warn('Could not read db.json, re-initializing seed data:', e);
       db = initializeSeedData();
@@ -417,11 +419,16 @@ export async function syncToPostgres(): Promise<void> {
     const pool = createPool();
     // 1. Sync users
     for (const u of db.users) {
+      if (u.id === 'usr_student_01' || u.email === 'student@aurastudy.edu.vn') continue;
       await pool.query(
-        `INSERT INTO "users" (id, uid, email, full_name, role, avatar_url, is_active, created_at)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-         ON CONFLICT (id) DO UPDATE SET email = EXCLUDED.email, full_name = EXCLUDED.full_name;`,
-        [u.id, u.id, u.email, u.full_name || u.email, u.role || 'student', u.avatar_url || '', u.is_active ?? true, u.created_at || new Date().toISOString()]
+        `INSERT INTO "users" (id, uid, email, password_hash, full_name, school, role, avatar_url, is_active, created_at)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+         ON CONFLICT (id) DO UPDATE SET
+           email = EXCLUDED.email,
+           password_hash = COALESCE(EXCLUDED.password_hash, users.password_hash),
+           full_name = EXCLUDED.full_name,
+           school = EXCLUDED.school;`,
+        [u.id, u.id, u.email, u.password_hash || '', u.full_name || u.email, u.school || '', u.role || 'student', u.avatar_url || '', u.is_active ?? true, u.created_at || new Date().toISOString()]
       );
     }
 

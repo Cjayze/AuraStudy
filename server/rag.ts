@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { GoogleGenAI } from '@google/genai';
 import { getDb, DocumentChunk, ensureDocumentCleanText } from './db';
 

@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import express from 'express';
 import path from 'path';
 import { createServer as createViteServer } from 'vite';
@@ -98,7 +99,14 @@ async function startServer() {
   }
 
   app.listen(PORT, '0.0.0.0', () => {
-    console.log(`🚀 AuraStudy Server is running at http://0.0.0.0:${PORT}`);
+    console.log(`🚀 AuraStudy Server is running at http://localhost:${PORT}`);
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey || apiKey === 'MY_GEMINI_API_KEY' || apiKey.trim() === '') {
+      console.warn('⚠️ [AuraStudy] CẢNH BÁO: Chưa tìm thấy GEMINI_API_KEY hợp lệ trong file .env!');
+      console.warn('⚠️ Hệ thống sẽ tự động dùng bộ sinh dự phòng cục bộ (Heuristic). Để tạo câu hỏi chất lượng cao bằng Gemini AI chuẩn NotebookLM, vui lòng tạo file .env và điền: GEMINI_API_KEY="AIzaSy..."');
+    } else {
+      console.log('✅ [AuraStudy] Đã phát hiện GEMINI_API_KEY. Sẵn sàng tạo Quiz chuẩn NotebookLM bằng Gemini AI!');
+    }
   });
 }
 

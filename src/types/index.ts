@@ -90,6 +90,7 @@ export interface Question {
   option_d: string;
   correct_ans?: 'A' | 'B' | 'C' | 'D';
   explanation?: string;
+  concept_tested?: string;
 }
 
 export interface QuizDetail {
@@ -109,6 +110,7 @@ export interface QuizEvaluationResult {
   correct_ans: string;
   is_correct: boolean;
   explanation: string;
+  concept_tested?: string;
 }
 
 export interface QuizSubmitResult {
@@ -132,7 +134,8 @@ export interface QuizSubmitResult {
 
 export interface DocumentSummary {
   summary: string;
-  key_concepts: string[];
-  bullet_points: string[];
-  word_count: number;
+  key_concepts?: string[];
+  bullet_points?: string[];
+  exam_tips?: string[];
+  word_count?: number;
 }

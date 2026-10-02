@@ -2,7 +2,8 @@ import { Router, Response } from 'express';
 import { getDb, saveDb, User } from '../db';
 import { generateToken, hashPassword, comparePassword, authenticateToken, AuthRequest } from '../auth';
 import { adminAuth } from '../../src/lib/firebase-admin.ts';
-import { getOrCreateUser } from '../../src/db/users.ts';
+import { findUserByEmail, createUserInSupabase, getOrCreateUser } from '../../src/db/users.ts';
+import { createPool } from '../../src/db/index.ts';
 
 export const authRouter = Router();
 
@@ -18,20 +19,20 @@ authRouter.post('/firebase-login', async (req, res) => {
     }
 
     const decoded = await adminAuth.verifyIdToken(idToken);
-    const email = decoded.email || `${decoded.uid}@aurastudy.user`;
+    const email = (decoded.email || `${decoded.uid}@aurastudy.user`).trim().toLowerCase();
     const fullName = decoded.name || email.split('@')[0];
     const avatarUrl = decoded.picture || '';
 
-    // Synchronize to Cloud SQL via getOrCreateUser
+    // Synchronize to Supabase via createUserInSupabase / getOrCreateUser
     try {
       await getOrCreateUser(decoded.uid, email, fullName, avatarUrl);
     } catch (sqlErr) {
-      console.warn('Note: getOrCreateUser Cloud SQL sync warning:', sqlErr);
+      console.warn('Supabase sync warning in firebase-login:', sqlErr);
     }
 
     // Sync to memory/disk state
     const db = getDb();
-    let user = db.users.find(u => u.id === decoded.uid || u.email.toLowerCase() === email.toLowerCase());
+    let user = db.users.find(u => u.id === decoded.uid || u.email.toLowerCase() === email);
     if (!user) {
       user = {
         id: decoded.uid,
@@ -62,7 +63,7 @@ authRouter.post('/firebase-login', async (req, res) => {
 
     return res.status(200).json({
       status: 'success',
-      message: 'Đăng nhập Google thành công!',
+      message: 'Đăng nhập Google thành công và đã đồng bộ cơ sở dữ liệu Supabase!',
       data: {
         user: {
           id: user.id,
@@ -87,7 +88,7 @@ authRouter.post('/firebase-login', async (req, res) => {
 });
 
 // POST /api/auth/register
-authRouter.post('/register', (req, res) => {
+authRouter.post('/register', async (req, res) => {
   try {
     const email = req.body.email ? String(req.body.email).trim().toLowerCase() : '';
     const password = req.body.password ? String(req.body.password) : '';
@@ -116,19 +117,61 @@ authRouter.post('/register', (req, res) => {
       });
     }
 
+    // 1. Check if user already exists directly in Supabase
+    try {
+      const existingInSupabase = await findUserByEmail(email);
+      if (existingInSupabase) {
+        return res.status(409).json({
+          status: 'error',
+          message: 'Email này đã được đăng ký trên cơ sở dữ liệu Supabase. Vui lòng đăng nhập hoặc sử dụng email khác.'
+        });
+      }
+    } catch (checkErr) {
+      console.warn('Supabase email pre-check error (continuing):', checkErr);
+    }
+
+    // 2. Check local DB cache
     const db = getDb();
-    const existing = db.users.find(u => u.email.toLowerCase() === email.toLowerCase());
-    if (existing) {
+    const existingLocal = db.users.find(u => u.email.toLowerCase() === email);
+    if (existingLocal) {
       return res.status(409).json({
         status: 'error',
-        message: 'Email này đã được đăng ký trên hệ thống AuraStudy. Vui lòng sử dụng email khác hoặc đăng nhập.'
+        message: 'Email này đã tồn tại trên hệ thống. Vui lòng đăng nhập.'
       });
     }
 
+    const newUserId = `usr_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+    const hashedPassword = hashPassword(password);
+
+    // 3. Directly store in Supabase
+    let supabaseUser = null;
+    try {
+      supabaseUser = await createUserInSupabase({
+        id: newUserId,
+        email,
+        passwordHash: hashedPassword,
+        fullName,
+        school: school || undefined,
+        role: 'student'
+      });
+      console.log(`[Supabase] Created user ${email} successfully with ID: ${newUserId}`);
+    } catch (supErr: any) {
+      console.error('Error writing user directly to Supabase:', supErr);
+      // If error is duplicate key in Supabase
+      if (supErr.message && supErr.message.includes('unique')) {
+        return res.status(409).json({
+          status: 'error',
+          message: 'Tài khoản email này đã tồn tại trên cơ sở dữ liệu Supabase.'
+        });
+      }
+      throw supErr;
+    }
+
+    // 4. Mirror in memory/local database for session and document association
     const newUser: User = {
-      id: `usr_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+      id: newUserId,
       email,
-      password_hash: hashPassword(password),
+      password_hash: hashedPassword,
       full_name: fullName,
       school: school || undefined,
       role: 'student',
@@ -138,7 +181,7 @@ authRouter.post('/register', (req, res) => {
 
     db.users.push(newUser);
 
-    // Initialize learning progress record for user
+    // Initialize learning progress in local DB
     db.learning_progress.push({
       id: `prog_${newUser.id}`,
       user_id: newUser.id,
@@ -155,7 +198,7 @@ authRouter.post('/register', (req, res) => {
 
     return res.status(201).json({
       status: 'success',
-      message: 'Đăng ký tài khoản AuraStudy thành công!',
+      message: 'Đăng ký tài khoản và lưu thành công vào cơ sở dữ liệu Supabase!',
       data: {
         user: {
           id: newUser.id,
@@ -170,16 +213,17 @@ authRouter.post('/register', (req, res) => {
       }
     });
   } catch (error: any) {
+    console.error('Registration error:', error);
     return res.status(500).json({
       status: 'error',
-      message: 'Đã xảy ra lỗi máy chủ trong quá trình đăng ký.',
+      message: 'Đã xảy ra lỗi trong quá trình lưu tài khoản vào cơ sở dữ liệu Supabase.',
       error: error?.message
     });
   }
 });
 
 // POST /api/auth/login
-authRouter.post('/login', (req, res) => {
+authRouter.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
 
@@ -190,43 +234,130 @@ authRouter.post('/login', (req, res) => {
       });
     }
 
+    const trimmedEmail = String(email).trim().toLowerCase();
     const db = getDb();
-    const user = db.users.find(u => u.email.toLowerCase() === email.trim().toLowerCase());
 
-    if (!user || !comparePassword(password, user.password_hash)) {
+    // 1. Direct query to Supabase database
+    let supabaseUser = null;
+    try {
+      supabaseUser = await findUserByEmail(trimmedEmail);
+    } catch (dbErr) {
+      console.warn('Direct Supabase query failed in login, fallback to local cache:', dbErr);
+    }
+
+    let authenticatedUser: User | null = null;
+
+    if (supabaseUser) {
+      let passwordMatches = false;
+
+      if (supabaseUser.passwordHash) {
+        passwordMatches = comparePassword(password, supabaseUser.passwordHash);
+      } else {
+        // Fallback: check local db for existing password hash and backfill to Supabase
+        const localMatch = db.users.find(u => u.email.toLowerCase() === trimmedEmail);
+        if (localMatch && comparePassword(password, localMatch.password_hash)) {
+          passwordMatches = true;
+          try {
+            const pool = createPool();
+            await pool.query('UPDATE users SET password_hash = $1 WHERE id = $2', [localMatch.password_hash, supabaseUser.id]);
+          } catch (updateErr) {
+            console.warn('Backfill password to Supabase error:', updateErr);
+          }
+        }
+      }
+
+      if (!passwordMatches) {
+        return res.status(401).json({
+          status: 'error',
+          message: 'Email hoặc mật khẩu không chính xác.'
+        });
+      }
+
+      if (supabaseUser.isActive === false) {
+        return res.status(403).json({
+          status: 'error',
+          message: 'Tài khoản của bạn đang bị tạm khóa. Vui lòng liên hệ Admin.'
+        });
+      }
+
+      // Ensure user is present in local cache
+      let localUser = db.users.find(u => u.id === supabaseUser!.id || u.email.toLowerCase() === trimmedEmail);
+      if (!localUser) {
+        localUser = {
+          id: supabaseUser.id,
+          email: supabaseUser.email,
+          password_hash: supabaseUser.passwordHash || '',
+          full_name: supabaseUser.fullName || supabaseUser.email.split('@')[0],
+          school: supabaseUser.school || undefined,
+          role: (supabaseUser.role as any) || 'student',
+          avatar_url: supabaseUser.avatarUrl || '',
+          is_active: supabaseUser.isActive ?? true,
+          created_at: supabaseUser.createdAt ? new Date(supabaseUser.createdAt).toISOString() : new Date().toISOString()
+        };
+        db.users.push(localUser);
+        saveDb();
+      }
+
+      authenticatedUser = localUser;
+    } else {
+      // If user not in Supabase yet, check local DB
+      const localUser = db.users.find(u => u.email.toLowerCase() === trimmedEmail);
+      if (localUser && comparePassword(password, localUser.password_hash)) {
+        if (!localUser.is_active) {
+          return res.status(403).json({
+            status: 'error',
+            message: 'Tài khoản của bạn đang bị tạm khóa. Vui lòng liên hệ Admin.'
+          });
+        }
+
+        // Immediately sync to Supabase!
+        try {
+          await createUserInSupabase({
+            id: localUser.id,
+            email: localUser.email,
+            passwordHash: localUser.password_hash,
+            fullName: localUser.full_name,
+            school: localUser.school || '',
+            role: localUser.role,
+            avatarUrl: localUser.avatar_url
+          });
+          console.log(`[Supabase] Synced existing local user ${localUser.email} to Supabase on login.`);
+        } catch (syncErr) {
+          console.warn('Sync local user to Supabase on login error:', syncErr);
+        }
+
+        authenticatedUser = localUser;
+      }
+    }
+
+    if (!authenticatedUser) {
       return res.status(401).json({
         status: 'error',
         message: 'Email hoặc mật khẩu không chính xác.'
       });
     }
 
-    if (!user.is_active) {
-      return res.status(403).json({
-        status: 'error',
-        message: 'Tài khoản của bạn đang bị tạm khóa. Vui lòng liên hệ Admin.'
-      });
-    }
-
-    const token = generateToken(user);
+    const token = generateToken(authenticatedUser);
 
     return res.status(200).json({
       status: 'success',
-      message: 'Đăng nhập thành công vào AuraStudy!',
+      message: 'Đăng nhập thành công với cơ sở dữ liệu Supabase!',
       data: {
         user: {
-          id: user.id,
-          email: user.email,
-          name: user.full_name,
-          full_name: user.full_name,
-          role: user.role,
-          school: user.school || '',
-          avatar_url: user.avatar_url
+          id: authenticatedUser.id,
+          email: authenticatedUser.email,
+          name: authenticatedUser.full_name,
+          full_name: authenticatedUser.full_name,
+          role: authenticatedUser.role,
+          school: authenticatedUser.school || '',
+          avatar_url: authenticatedUser.avatar_url
         },
         access_token: token,
         token_type: 'Bearer'
       }
     });
   } catch (error: any) {
+    console.error('Login error:', error);
     return res.status(500).json({
       status: 'error',
       message: 'Lỗi máy chủ khi đăng nhập.',

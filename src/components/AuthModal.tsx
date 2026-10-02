@@ -35,7 +35,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
       localStorage.setItem('aurastudy_token', res.access_token);
       localStorage.setItem('aurastudy_user', JSON.stringify(res.user));
       localStorage.removeItem('aurastudy_logged_out');
-      setSuccessMsg('Đăng nhập Google thành công! Đang chuyển tiếp...');
+      setSuccessMsg('Đăng nhập Google thành công và đã lưu vào Supabase! Đang chuyển tiếp...');
       setTimeout(() => {
         onSuccess(res.user);
         onClose();
@@ -54,16 +54,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
     setIsRegister(registerMode);
     setError(null);
     setSuccessMsg(null);
-    if (registerMode) {
-      // Clear demo values so user can register normally with their own info
-      if (email === 'student@aurastudy.edu.vn') setEmail('');
-      if (password === 'Password123@') setPassword('');
-      if (name === 'Nguyễn Văn Sinh Viên') setName('');
-    } else {
-      // In login mode, if empty, set demo credentials as convenience
-      if (!email) setEmail('student@aurastudy.edu.vn');
-      if (!password) setPassword('Password123@');
-    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -77,13 +67,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
     const trimmedSchool = school.trim();
 
     if (!trimmedEmail) {
-      setError('Vui lòng nhập địa chỉ email.');
+      setError('Vui lòng nhập địa chỉ email của bạn.');
       return;
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(trimmedEmail)) {
-      setError('Địa chỉ email không đúng định dạng hợp lệ (vd: ten@email.com).');
+      setError('Địa chỉ email không đúng định dạng hợp lệ (vd: sinhvien@gmail.com).');
       return;
     }
 
@@ -105,7 +95,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
         localStorage.setItem('aurastudy_token', res.access_token);
         localStorage.setItem('aurastudy_user', JSON.stringify(res.user));
         localStorage.removeItem('aurastudy_logged_out');
-        setSuccessMsg('Đăng ký tài khoản thành công! Đang chuyển tiếp...');
+        setSuccessMsg('Đăng ký tài khoản thành công! ');
         setTimeout(() => {
           onSuccess(res.user);
           onClose();
@@ -115,7 +105,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
         localStorage.setItem('aurastudy_token', res.access_token);
         localStorage.setItem('aurastudy_user', JSON.stringify(res.user));
         localStorage.removeItem('aurastudy_logged_out');
-        setSuccessMsg('Đăng nhập thành công! Đang chuyển tiếp...');
+        setSuccessMsg('Đăng nhập thành công ');
         setTimeout(() => {
           onSuccess(res.user);
           onClose();
@@ -123,28 +113,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
       }
     } catch (err: any) {
       setError(err?.message || 'Có lỗi xảy ra, vui lòng kiểm tra lại thông tin.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleQuickDemoLogin = async () => {
-    setEmail('student@aurastudy.edu.vn');
-    setPassword('Password123@');
-    setError(null);
-    setLoading(true);
-    try {
-      const res = await api.login('student@aurastudy.edu.vn', 'Password123@');
-      localStorage.setItem('aurastudy_token', res.access_token);
-      localStorage.setItem('aurastudy_user', JSON.stringify(res.user));
-      localStorage.removeItem('aurastudy_logged_out');
-      setSuccessMsg('Đã đăng nhập tài khoản sinh viên mẫu!');
-      setTimeout(() => {
-        onSuccess(res.user);
-        onClose();
-      }, 500);
-    } catch (err: any) {
-      setError(err?.message || 'Không thể đăng nhập tài khoản mẫu.');
     } finally {
       setLoading(false);
     }
@@ -166,7 +134,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
         </button>
 
         {/* Header */}
-        <div className="flex items-center space-x-3 mb-6 pr-8">
+        <div className="flex items-center space-x-3 mb-5 pr-8">
           <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold shadow-md shadow-blue-200 shrink-0">
             <BookOpen className="w-5 h-5" />
           </div>
@@ -175,29 +143,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
               AuraStudy <Sparkles className="w-4 h-4 text-amber-500 fill-amber-400" />
             </h2>
             <p className="text-xs text-slate-500">
-              {isRegister ? 'Đăng ký tài khoản học tập thông minh' : 'Hệ thống trợ lý học tập AI & Ôn thi trắc nghiệm'}
+              {isRegister ? 'Đăng ký tài khoản học tập ' : 'Đăng nhập hệ thống '}
             </p>
           </div>
         </div>
-
-        {/* Quick Demo Login Banner (shown in login mode) */}
-        {!isRegister && (
-          <div className="mb-4 p-3.5 bg-blue-50/80 border border-blue-100 rounded-xl flex items-center justify-between">
-            <div className="text-xs text-blue-900">
-              <p className="font-semibold text-blue-950">Tài khoản sinh viên mẫu:</p>
-              <p className="text-blue-700">student@aurastudy.edu.vn</p>
-            </div>
-            <button
-              id="quick-demo-login-btn"
-              type="button"
-              onClick={handleQuickDemoLogin}
-              disabled={loading}
-              className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-xs font-medium rounded-lg shadow-sm transition-all whitespace-nowrap cursor-pointer"
-            >
-              Đăng nhập ngay
-            </button>
-          </div>
-        )}
 
         {/* Google One-Click Login */}
         <div className="mb-4">
@@ -267,7 +216,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
                   type="text"
                   value={school}
                   onChange={(e) => setSchool(e.target.value)}
-                  placeholder="Ví dụ: ĐH Bách Khoa, ĐH Quốc Gia..."
+                  placeholder="Ví dụ: ĐH Bách Khoa, ĐH Phenikaa..."
                   className="w-full px-3.5 py-2 text-sm border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
@@ -299,7 +248,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Tối thiểu 6 ký tự"
+              placeholder="Nhập mật khẩu (tối thiểu 6 ký tự)"
               className="w-full px-3.5 py-2 text-sm border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
@@ -356,4 +305,3 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
     </div>
   );
 };
-
