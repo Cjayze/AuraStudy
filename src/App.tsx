@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { User, DocumentItem, QuizItem, DashboardData } from './types';
 import { api } from './services/api';
 import { Navbar } from './components/Navbar';
@@ -8,11 +8,14 @@ import { DocumentsView } from './components/DocumentsView';
 import { ChatView } from './components/ChatView';
 import { QuizView } from './components/QuizView';
 import { AuthModal } from './components/AuthModal';
+import { LandingPage } from './components/LandingPage';
+import { supabase } from './lib/supabase';
 
 export default function App() {
   const [user, setUser] = useState<User | null>(null);
   const [activeTab, setActiveTab] = useState<'dashboard' | 'documents' | 'chat' | 'quizzes'>('dashboard');
   const [isAuthOpen, setIsAuthOpen] = useState(false);
+  const oauthCallbackHandled = useRef(false);
 
   // Core data states
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
@@ -34,7 +37,34 @@ export default function App() {
         localStorage.removeItem('aurastudy_user');
       }
 
-      const isLoggedOut = localStorage.getItem('aurastudy_logged_out') === 'true';
+      const isOAuthReturn = new URLSearchParams(window.location.search).has('code');
+      if (isOAuthReturn && supabase && !oauthCallbackHandled.current) {
+        oauthCallbackHandled.current = true;
+        try {
+          const { data: { session }, error } = await supabase.auth.getSession();
+          if (error) throw error;
+          if (!session?.access_token) throw new Error('Supabase did not return an authenticated session.');
+          const result = await api.supabaseLogin(session.access_token);
+          localStorage.setItem('aurastudy_token', result.access_token);
+          localStorage.setItem('aurastudy_user', JSON.stringify(result.user));
+          localStorage.removeItem('aurastudy_logged_out');
+          window.history.replaceState({}, document.title, window.location.pathname);
+          sessionStorage.removeItem('supabase_auth_callback_error');
+          setUser(result.user);
+          setLoading(false);
+          return;
+        } catch (error) {
+          console.error('Supabase OAuth callback failed:', error);
+          sessionStorage.setItem(
+            'supabase_auth_callback_error',
+            error instanceof Error ? error.message : 'Không thể hoàn tất phiên đăng nhập Google.'
+          );
+          window.history.replaceState({}, document.title, window.location.pathname);
+          setIsAuthOpen(true);
+          setLoading(false);
+          return;
+        }
+      }
       const savedToken = localStorage.getItem('aurastudy_token');
       if (savedToken) {
         try {
@@ -51,10 +81,6 @@ export default function App() {
       }
 
       setLoading(false);
-      // If user has no active token and hasn't explicitly logged out, show auth modal
-      if (!isLoggedOut) {
-        setIsAuthOpen(true);
-      }
     };
 
     initAuth();
@@ -97,11 +123,11 @@ export default function App() {
   }, []);
 
   const handleLogout = () => {
+    void supabase?.auth.signOut();
     localStorage.removeItem('aurastudy_token');
     localStorage.removeItem('aurastudy_user');
     localStorage.setItem('aurastudy_logged_out', 'true');
     setUser(null);
-    setIsAuthOpen(true);
   };
 
   const handleSelectDocForChat = (doc: DocumentItem) => {
@@ -113,6 +139,31 @@ export default function App() {
     setPreSelectedDocForQuiz(doc);
     setActiveTab('quizzes');
   };
+
+  if (loading && !user) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#fbfbff]">
+        <div className="h-9 w-9 animate-spin rounded-full border-4 border-violet-200 border-t-violet-600" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <>
+        <LandingPage onLogin={() => setIsAuthOpen(true)} />
+        <AuthModal
+          isOpen={isAuthOpen}
+          onClose={() => setIsAuthOpen(false)}
+          onSuccess={(nextUser) => {
+            setIsAuthOpen(false);
+            setUser(nextUser);
+            fetchData();
+          }}
+        />
+      </>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-100/60 font-sans text-slate-900 flex flex-col selection:bg-blue-500 selection:text-white">

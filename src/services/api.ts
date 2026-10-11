@@ -76,11 +76,11 @@ export const api = {
     return handleResponse(res);
   },
 
-  firebaseLogin: async (idToken: string): Promise<{ user: User; access_token: string }> => {
-    const res = await fetch(`${BASE_URL}/auth/firebase-login`, {
+  supabaseLogin: async (accessToken: string): Promise<{ user: User; access_token: string }> => {
+    const res = await fetch(`${BASE_URL}/auth/supabase-login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ idToken })
+      body: JSON.stringify({ accessToken })
     });
     return handleResponse(res);
   },

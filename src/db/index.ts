@@ -10,18 +10,15 @@ declare global {
 // Function to create or retrieve the connection pool.
 export const createPool = () => {
   if (!global._postgresPool) {
-    const supabasePassword = process.env.SUPABASE_PASSWORD || process.env.SUPABASE_DB_PASSWORD || 'xvEBeWt531dOCujk';
-    const isSupabaseConfigured = Boolean(
-      supabasePassword &&
-      supabasePassword.trim() !== '' &&
-      supabasePassword !== '[YOUR-PASSWORD]'
-    );
+    const supabasePassword = process.env.SUPABASE_PASSWORD || process.env.SUPABASE_DB_PASSWORD;
+    const supabaseHost = process.env.SUPABASE_HOST;
+    const isSupabaseConfigured = Boolean(supabasePassword?.trim() && supabaseHost?.trim());
 
     if (isSupabaseConfigured) {
-      console.log('Connecting to Supabase PostgreSQL at db.rdfgjqbvcjywlgjcwfdx.supabase.co...');
+      console.log(`Connecting to Supabase PostgreSQL at ${supabaseHost}...`);
       global._postgresPool = new Pool({
-        host: process.env.SUPABASE_HOST || 'db.rdfgjqbvcjywlgjcwfdx.supabase.co',
-        port: 5432,
+        host: supabaseHost,
+        port: Number(process.env.SUPABASE_PORT || 5432),
         user: process.env.SUPABASE_USER || 'postgres',
         password: supabasePassword,
         database: process.env.SUPABASE_DATABASE || 'postgres',
@@ -30,6 +27,9 @@ export const createPool = () => {
         connectionTimeoutMillis: 15000,
       });
     } else {
+      if (supabasePassword || supabaseHost) {
+        throw new Error('Supabase chưa được cấu hình đầy đủ. Cần đặt SUPABASE_HOST và SUPABASE_PASSWORD trong .env.');
+      }
       global._postgresPool = new Pool({
         host: process.env.SQL_HOST,
         user: process.env.SQL_USER,

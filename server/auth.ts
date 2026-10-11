@@ -2,7 +2,6 @@ import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import { getDb, User } from './db';
-import { adminAuth } from '../src/lib/firebase-admin.ts';
 import { findUserById } from '../src/db/users.ts';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'aurastudy-super-secret-jwt-key-2026';
@@ -79,37 +78,9 @@ export async function authenticateToken(req: AuthRequest, res: Response, next: N
       return next();
     }
   } catch {
-    // Continue to Firebase ID token check
   }
 
-  // 2. Try Firebase ID token
-  try {
-    const decodedToken = await adminAuth.verifyIdToken(token);
-    const db = getDb();
-    let user = db.users.find(u => u.id === decodedToken.uid || u.email.toLowerCase() === (decodedToken.email || '').toLowerCase());
-
-    if (!user) {
-      user = {
-        id: decodedToken.uid,
-        email: decodedToken.email || `${decodedToken.uid}@aurastudy.user`,
-        password_hash: '',
-        full_name: decodedToken.name || (decodedToken.email ? decodedToken.email.split('@')[0] : 'Aura Learner'),
-        role: 'student',
-        avatar_url: decodedToken.picture,
-        is_active: true,
-        created_at: new Date().toISOString()
-      };
-      db.users.push(user);
-    }
-
-    req.user = user;
-    return next();
-  } catch {
-    return res.status(403).json({
-      status: 'error',
-      message: 'Token xác thực không hợp lệ hoặc đã hết hạn.'
-    });
-  }
+  return res.status(403).json({ status: 'error', message: 'Token kh?ng h?p l? ho?c ?? h?t h?n.' });
 }
 
 export function requireRole(role: 'student' | 'admin') {

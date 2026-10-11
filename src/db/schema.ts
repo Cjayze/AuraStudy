@@ -1,7 +1,7 @@
 import { pgTable, text, integer, boolean, timestamp } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
-// Users table supporting Firebase Auth UID and traditional user IDs
+// Users table supporting Supabase Auth UID and traditional user IDs
 export const users = pgTable('users', {
   id: text('id').primaryKey(),
   uid: text('uid').unique(),

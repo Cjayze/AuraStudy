@@ -5,6 +5,7 @@ import fs from 'fs';
 import { getDb, saveDb, Document, DocumentChunk, ensureDocumentCleanText } from '../db';
 import { authenticateToken, AuthRequest } from '../auth';
 import { extractTextFromFile, splitIntoChunks } from '../parser';
+import { normalizeUploadedFilename } from '../filename';
 
 export const documentRouter = Router();
 
@@ -82,7 +83,7 @@ documentRouter.get('/', authenticateToken, (req: AuthRequest, res: Response) => 
         id: d.id,
         title: d.title,
         subject: d.subject,
-        file_name: d.file_name,
+        file_name: normalizeUploadedFilename(d.file_name),
         file_type: d.file_type,
         file_size: d.file_size,
         status: d.status,
@@ -156,16 +157,7 @@ documentRouter.post('/upload', authenticateToken, handleUploadFile, async (req: 
       });
     }
 
-    // Normalize UTF-8 file name in case multer parsed with latin1
-    let originalName = file.originalname;
-    try {
-      const decodedName = Buffer.from(file.originalname, 'latin1').toString('utf8');
-      if (decodedName && !decodedName.includes('')) {
-        originalName = decodedName;
-      }
-    } catch {
-      originalName = file.originalname;
-    }
+    const originalName = normalizeUploadedFilename(file.originalname);
 
     const title = (req.body.title || path.parse(originalName).name).trim();
     const subject = (req.body.subject || 'Chung').trim();

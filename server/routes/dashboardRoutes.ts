@@ -1,6 +1,7 @@
 import { Router, Response } from 'express';
 import { getDb } from '../db';
 import { authenticateToken, AuthRequest } from '../auth';
+import { normalizeUploadedFilename } from '../filename';
 
 export const dashboardRouter = Router();
 
@@ -37,7 +38,7 @@ dashboardRouter.get('/', authenticateToken, (req: AuthRequest, res: Response) =>
         id: d.id,
         title: d.title,
         subject: d.subject,
-        file_name: d.file_name,
+        file_name: normalizeUploadedFilename(d.file_name),
         file_type: d.file_type,
         file_size: d.file_size,
         status: d.status,

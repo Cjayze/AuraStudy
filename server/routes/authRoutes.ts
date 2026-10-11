@@ -1,89 +1,69 @@
 import { Router, Response } from 'express';
 import { getDb, saveDb, User } from '../db';
 import { generateToken, hashPassword, comparePassword, authenticateToken, AuthRequest } from '../auth';
-import { adminAuth } from '../../src/lib/firebase-admin.ts';
 import { findUserByEmail, createUserInSupabase, getOrCreateUser } from '../../src/db/users.ts';
 import { createPool } from '../../src/db/index.ts';
 
 export const authRouter = Router();
 
-// POST /api/auth/firebase-login
-authRouter.post('/firebase-login', async (req, res) => {
+// POST /api/auth/supabase-login
+// Verify the Supabase Auth access token server-side, then issue AuraStudy's API JWT.
+authRouter.post('/supabase-login', async (req, res) => {
   try {
-    const { idToken } = req.body;
-    if (!idToken) {
-      return res.status(400).json({
-        status: 'error',
-        message: 'Thiếu Firebase idToken để xác thực.'
-      });
+    const { accessToken } = req.body;
+    const supabaseUrl = process.env.SUPABASE_URL;
+    const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
+    if (!accessToken || !supabaseUrl || !supabaseAnonKey) {
+      return res.status(400).json({ status: 'error', message: 'Missing access token or Supabase URL/public key configuration.' });
     }
 
-    const decoded = await adminAuth.verifyIdToken(idToken);
-    const email = (decoded.email || `${decoded.uid}@aurastudy.user`).trim().toLowerCase();
-    const fullName = decoded.name || email.split('@')[0];
-    const avatarUrl = decoded.picture || '';
+    const authResponse = await fetch(`${supabaseUrl.replace(/\/$/, '')}/auth/v1/user`, {
+      headers: { apikey: supabaseAnonKey, Authorization: `Bearer ${accessToken}` }
+    });
+    if (!authResponse.ok) {
+      return res.status(401).json({ status: 'error', message: 'Supabase session is invalid or expired.' });
+    }
+    const authUser = await authResponse.json() as { id: string; email?: string; user_metadata?: Record<string, unknown> };
+    const email = (authUser.email || '').trim().toLowerCase();
+    if (!email) return res.status(400).json({ status: 'error', message: 'Google account did not provide an email address.' });
+    const fullName = String(authUser.user_metadata?.full_name || authUser.user_metadata?.name || email.split('@')[0]);
+    const avatarUrl = String(authUser.user_metadata?.avatar_url || authUser.user_metadata?.picture || '');
 
-    // Synchronize to Supabase via createUserInSupabase / getOrCreateUser
     try {
-      await getOrCreateUser(decoded.uid, email, fullName, avatarUrl);
-    } catch (sqlErr) {
-      console.warn('Supabase sync warning in firebase-login:', sqlErr);
+      await getOrCreateUser(authUser.id, email, fullName, avatarUrl);
+    } catch (syncErr) {
+      console.warn('Supabase user profile sync warning:', syncErr);
     }
 
-    // Sync to memory/disk state
     const db = getDb();
-    let user = db.users.find(u => u.id === decoded.uid || u.email.toLowerCase() === email);
+    let user = db.users.find(u => u.id === authUser.id || u.email.toLowerCase() === email);
     if (!user) {
       user = {
-        id: decoded.uid,
-        email,
-        password_hash: '',
-        full_name: fullName,
-        role: 'student',
-        avatar_url: avatarUrl,
-        is_active: true,
+        id: authUser.id, email, password_hash: '', full_name: fullName,
+        role: 'student', avatar_url: avatarUrl, is_active: true,
         created_at: new Date().toISOString()
       };
       db.users.push(user);
-
-      // Add default learning progress
       db.learning_progress.push({
-        id: `prog_${user.id}`,
-        user_id: user.id,
-        total_documents: 0,
-        total_questions_asked: 0,
-        total_quizzes_completed: 0,
-        average_score: 0,
-        last_active_at: new Date().toISOString()
+        id: `prog_${user.id}`, user_id: user.id, total_documents: 0,
+        total_questions_asked: 0, total_quizzes_completed: 0,
+        average_score: 0, last_active_at: new Date().toISOString()
       });
       saveDb();
     }
 
     const token = generateToken(user);
-
     return res.status(200).json({
       status: 'success',
-      message: 'Đăng nhập Google thành công và đã đồng bộ cơ sở dữ liệu Supabase!',
       data: {
-        user: {
-          id: user.id,
-          email: user.email,
-          name: user.full_name,
-          full_name: user.full_name,
-          role: user.role,
-          school: user.school || '',
-          avatar_url: user.avatar_url
-        },
-        access_token: token,
-        token_type: 'Bearer'
+        user: { id: user.id, email: user.email, name: user.full_name, full_name: user.full_name,
+          role: user.role, school: user.school || '', avatar_url: user.avatar_url },
+        access_token: token, token_type: 'Bearer'
       }
     });
-  } catch (error: any) {
-    console.error('Firebase login error:', error);
-    return res.status(401).json({
-      status: 'error',
-      message: 'Xác thực tài khoản Google thất bại: ' + (error.message || 'Token không hợp lệ')
-    });
+  } catch (error) {
+    console.error('Supabase Google login error:', error);
+    return res.status(500).json({ status: 'error', message: 'Supabase Google sign-in failed.' });
   }
 });
 
@@ -242,7 +222,11 @@ authRouter.post('/login', async (req, res) => {
     try {
       supabaseUser = await findUserByEmail(trimmedEmail);
     } catch (dbErr) {
-      console.warn('Direct Supabase query failed in login, fallback to local cache:', dbErr);
+      console.error('Supabase query failed during login:', dbErr);
+      return res.status(503).json({
+        status: 'error',
+        message: 'Không thể kết nối cơ sở dữ liệu. Vui lòng kiểm tra cấu hình Supabase hoặc kết nối mạng rồi thử lại.'
+      });
     }
 
     let authenticatedUser: User | null = null;

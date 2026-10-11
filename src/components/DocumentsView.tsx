@@ -20,6 +20,16 @@ import {
   LogIn
 } from 'lucide-react';
 
+const cleanSummaryText = (text: string) => text
+  .replace(/^(\s*)#{1,6}\s*/gm, '$1\u0000')
+  .replace(/^(\s*)(?:[-+\u2022\u25cf\u25aa.]|\d+[.)])\s+/gm, '$1+ ')
+  .replace(/\u0000/g, '- ')
+  .replace(/\p{Extended_Pictographic}/gu, '')
+  .replace(/[*_`~]/g, '')
+  .replace(/[\u2022\u25cf\u25aa]/g, '-')
+  .replace(/[ \t]+\n/g, '\n')
+  .trim();
+
 interface DocumentsViewProps {
   documents: DocumentItem[];
   loading: boolean;
@@ -582,15 +592,12 @@ export const DocumentsView: React.FC<DocumentsViewProps> = ({
       {/* AI Summary Modal */}
       {summaryDoc && (
         <div id="summary-doc-modal-backdrop" className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
-          <div id="summary-doc-modal" className="bg-white rounded-2xl shadow-2xl border border-slate-200 max-w-2xl w-full p-6 relative max-h-[85vh] flex flex-col">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+          <div id="summary-doc-modal" className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full p-6 sm:p-8 relative max-h-[90vh] flex flex-col">
+            <div className="flex items-center justify-between pb-5 border-b border-slate-100">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-sky-50 text-sky-600 flex items-center justify-center">
-                  <BookOpen className="w-4 h-4" />
-                </div>
                 <div>
-                  <h3 className="text-base font-bold text-slate-900">Tóm tắt thông minh Aura AI</h3>
-                  <p className="text-xs text-slate-500">{summaryDoc.title}</p>
+                  <h3 className="text-xl font-bold text-slate-900">Tóm tắt thông minh Aura AI</h3>
+                  <p className="text-sm text-slate-500 mt-1">{summaryDoc.title}</p>
                 </div>
               </div>
               <button
@@ -604,29 +611,29 @@ export const DocumentsView: React.FC<DocumentsViewProps> = ({
               </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto py-4 text-xs text-slate-800 space-y-4 leading-relaxed">
+            <div className="flex-1 overflow-y-auto py-6 text-base text-slate-800 space-y-7 leading-8">
               {summaryLoading ? (
                 <div className="text-center py-12">
                   <div className="w-8 h-8 border-3 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
-                  <p className="text-xs text-slate-600 font-medium">Aura AI đang đọc và phân tích chuyên sâu nội dung bài giảng...</p>
+                  <p className="text-base text-slate-600 font-medium">Aura AI đang đọc và phân tích chuyên sâu nội dung bài giảng...</p>
                 </div>
               ) : summaryData ? (
-                <div className="space-y-4">
-                  <div className="p-4 bg-slate-50 rounded-xl border border-slate-200/80">
-                    <p className="font-semibold text-slate-800 text-xs mb-2">Bản tóm tắt chuyên sâu:</p>
-                    <div className="whitespace-pre-wrap text-slate-700 leading-relaxed text-xs">
-                      {summaryData.summary}
+                <div className="space-y-7">
+                  <div>
+                    <p className="font-bold text-slate-900 text-lg mb-3">Bản tóm tắt chuyên sâu:</p>
+                    <div className="whitespace-pre-wrap text-slate-700 leading-8 text-base sm:text-lg">
+                      {cleanSummaryText(summaryData.summary)}
                     </div>
                   </div>
 
                   {summaryData.bullet_points && summaryData.bullet_points.length > 0 && (
                     <div>
-                      <p className="font-semibold text-slate-800 text-xs mb-2">Ý chính cần nắm vững:</p>
-                      <ul className="space-y-1.5">
+                      <p className="font-bold text-slate-900 text-lg mb-3">Ý chính cần nắm vững:</p>
+                      <ul className="space-y-3">
                         {summaryData.bullet_points.map((b, i) => (
-                          <li key={i} className="flex items-start gap-2 text-xs text-slate-700">
-                            <span className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5 shrink-0"></span>
-                            <span>{b}</span>
+                          <li key={i} className="flex items-start gap-3 text-base sm:text-lg text-slate-700 leading-8">
+                            <span className="w-4 text-blue-600 font-bold shrink-0">+</span>
+                            <span>{cleanSummaryText(b)}</span>
                           </li>
                         ))}
                       </ul>
@@ -634,16 +641,15 @@ export const DocumentsView: React.FC<DocumentsViewProps> = ({
                   )}
 
                   {summaryData.exam_tips && summaryData.exam_tips.length > 0 && (
-                    <div className="p-3.5 bg-amber-50/80 border border-amber-200/80 rounded-xl">
-                      <p className="font-bold text-amber-900 text-xs mb-2 flex items-center gap-1.5">
-                        <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+                    <div className="border-t border-slate-200 pt-5">
+                      <p className="font-bold text-slate-900 text-lg mb-3 flex items-center gap-2">
                         Điểm mấu chốt ôn thi (Exam Tips):
                       </p>
-                      <ul className="space-y-1.5">
+                      <ul className="space-y-3">
                         {summaryData.exam_tips.map((tip, i) => (
-                          <li key={i} className="flex items-start gap-2 text-xs text-amber-950">
-                            <span className="w-1.5 h-1.5 rounded-full bg-amber-500 mt-1.5 shrink-0"></span>
-                            <span>{tip}</span>
+                          <li key={i} className="flex items-start gap-3 text-base sm:text-lg text-slate-700 leading-8">
+                            <span className="w-4 text-slate-500 font-bold shrink-0">+</span>
+                            <span>{cleanSummaryText(tip)}</span>
                           </li>
                         ))}
                       </ul>

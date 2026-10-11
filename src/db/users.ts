@@ -28,29 +28,8 @@ export async function findUserByEmail(email: string) {
     return rows.length > 0 ? rows[0] : null;
   } catch (error) {
     console.error('Error finding user by email in Supabase:', error);
-    // Direct pool fallback
-    try {
-      const pool = createPool();
-      const res = await pool.query('SELECT * FROM users WHERE LOWER(email) = LOWER($1) LIMIT 1;', [email.trim()]);
-      if (res.rows.length > 0) {
-        const r = res.rows[0];
-        return {
-          id: r.id,
-          uid: r.uid || r.id,
-          email: r.email,
-          passwordHash: r.password_hash,
-          fullName: r.full_name,
-          school: r.school,
-          role: r.role || 'student',
-          avatarUrl: r.avatar_url,
-          isActive: r.is_active,
-          createdAt: r.created_at,
-        };
-      }
-    } catch (fallbackErr) {
-      console.error('Fallback query error in findUserByEmail:', fallbackErr);
-    }
-    return null;
+    // Preserve the DB error so callers do not mistake an outage for a missing user.
+    throw error;
   }
 }
 

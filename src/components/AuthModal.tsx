@@ -1,8 +1,7 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { User } from '../types';
 import { api } from '../services/api';
-import { auth, googleAuthProvider } from '../lib/firebase';
-import { signInWithPopup } from 'firebase/auth';
+import { supabase } from '../lib/supabase';
 import { LogIn, UserPlus, Sparkles, BookOpen, AlertCircle, CheckCircle2, X } from 'lucide-react';
 
 interface AuthModalProps {
@@ -22,6 +21,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
+  useEffect(() => {
+    const callbackError = sessionStorage.getItem('supabase_auth_callback_error');
+    if (callbackError) {
+      setError(callbackError);
+      sessionStorage.removeItem('supabase_auth_callback_error');
+    }
+  }, []);
+
   if (!isOpen) return null;
 
   const handleGoogleSignIn = async () => {
@@ -29,23 +36,20 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
     setSuccessMsg(null);
     setGoogleLoading(true);
     try {
-      const result = await signInWithPopup(auth, googleAuthProvider);
-      const idToken = await result.user.getIdToken();
-      const res = await api.firebaseLogin(idToken);
-      localStorage.setItem('aurastudy_token', res.access_token);
-      localStorage.setItem('aurastudy_user', JSON.stringify(res.user));
-      localStorage.removeItem('aurastudy_logged_out');
-      setSuccessMsg('Đăng nhập Google thành công và đã lưu vào Supabase! Đang chuyển tiếp...');
-      setTimeout(() => {
-        onSuccess(res.user);
-        onClose();
-      }, 500);
+      if (!supabase) throw new Error('Thi\u1ebfu VITE_SUPABASE_URL ho\u1eb7c VITE_SUPABASE_ANON_KEY trong file .env.');
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: window.location.origin }
+      });
+      if (error) throw error;
     } catch (err: any) {
-      console.error('Google sign-in error:', err);
-      if (err.code !== 'auth/popup-closed-by-user') {
-        setError(err.message || 'Không thể đăng nhập bằng tài khoản Google. Vui lòng thử lại.');
-      }
-    } finally {
+      console.error('Supabase Google sign-in error:', err);
+      const messages: Record<string, string> = {
+        provider_disabled: 'Google ch\u01b0a \u0111\u01b0\u1ee3c b\u1eadt trong Supabase. M\u1edf Authentication > Providers > Google \u0111\u1ec3 c\u1ea5u h\u00ecnh.',
+        validation_failed: 'Supabase t\u1eeb ch\u1ed1i c\u1ea5u h\u00ecnh Google OAuth. Ki\u1ec3m tra Google Client ID v\u00e0 Client Secret.',
+        access_denied: 'B\u1ea1n \u0111\u00e3 t\u1eeb ch\u1ed1i \u0111\u0103ng nh\u1eadp Google.'
+      };
+      setError(messages[err.code] || err.message || 'Kh\u00f4ng th\u1ec3 \u0111\u0103ng nh\u1eadp Google qua Supabase.');
       setGoogleLoading(false);
     }
   };

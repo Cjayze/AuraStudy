@@ -1,6 +1,6 @@
 import React from 'react';
 import { User } from '../types';
-import { BookOpen, Sparkles, LogOut, User as UserIcon, LogIn } from 'lucide-react';
+import { LogOut, LogIn } from 'lucide-react';
 
 interface NavbarProps {
   user: User | null;
@@ -14,19 +14,17 @@ export const Navbar: React.FC<NavbarProps> = ({ user, onOpenAuth, onLogout }) =>
     <header id="app-navbar" className="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-200/80 px-4 sm:px-6 py-3 flex items-center justify-between">
       {/* Brand */}
       <div className="flex items-center space-x-3">
-        <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 to-sky-500 text-white flex items-center justify-center shadow-md shadow-blue-100">
-          <BookOpen className="w-5 h-5" />
-        </div>
+        <img
+          src="/assets/aurastudy-logo.png"
+          alt="AuraStudy"
+          className="w-10 h-10 object-contain shrink-0"
+        />
         <div>
           <div className="flex items-center gap-1.5">
             <span className="font-extrabold text-slate-900 tracking-tight text-lg">AuraStudy</span>
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-blue-50 text-blue-700 border border-blue-200/60">
-              <Sparkles className="w-3 h-3 text-blue-500 fill-blue-400" />
-              RAG AI
-            </span>
           </div>
           <p className="text-[11px] text-slate-500 hidden sm:block">
-            Trợ lý học tập thông minh & Ôn thi trắc nghiệm
+            Trợ lý học tập thông minh & Ôn thi
           </p>
         </div>
       </div>

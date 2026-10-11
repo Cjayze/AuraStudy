@@ -334,18 +334,7 @@ TÀI LIỆU: "${doc.title}" (Môn: ${doc.subject})
 NỘI DUNG TÀI LIỆU:
 ${truncatedText}
 
-HÃY TRẢ LỜI BẰNG TIẾNG VIỆT THEO CẤU TRÚC MARKDOWN:
-# 📌 TỔNG QUAN TÀI LIỆU
-(Nêu mục tiêu và bức tranh toàn cảnh ngắn gọn trong 2-3 câu)
-
-# 🔑 CÁC KHÁI NIỆM & KIẾN THỨC CỐT LÕI
-(Liệt kê các định nghĩa, nguyên lý hoặc công thức chính dạng bullet points)
-
-# 💡 ĐIỂM MẤU CHỐT ÔN THI (EXAM TIPS)
-(Các dạng câu hỏi dễ bị nhầm lẫn, lưu ý quan trọng khi làm bài thi)
-
-# ❓ 3 CÂU HỎI ÔN TẬP TỰ ĐÁNH GIÁ
-(3 câu hỏi trắc nghiệm hoặc tự luận ngắn để sinh viên tự kiểm tra)`;
+HÃY TRẢ LỜI BẰNG TIẾNG VIỆT THEO CẤU TRÚC PLAIN TEXT. Write in Vietnamese. Use simple section labels beginning with a hyphen. Use plus signs (+) for list items. Do not use hash symbols, emoji, bold markers, or decorative characters. Include a short overview, key concepts, exam tips, and three review questions.`;
 
   const ai = getGeminiClient();
   let summary = '';

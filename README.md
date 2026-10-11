@@ -16,14 +16,14 @@ AuraStudy là ứng dụng hỗ trợ học tập với AI. Người dùng có t
 - **Backend:** Node.js, Express, TypeScript
 - **AI:** Gemini API
 - **Dữ liệu:** JSON cục bộ; có tích hợp PostgreSQL/Supabase
-- **Xác thực:** Firebase Authentication và JWT
-
+- **Authentication:** Supabase Auth (Google OAuth) and JWT
+- **Authentication:** Supabase Auth (Google OAuth) and JWT
 ## Yêu cầu
 
 - Node.js 20 LTS trở lên và npm.
 - Gemini API key để sử dụng các tính năng AI. Một số chức năng tạo quiz có thể dùng chế độ dự phòng khi chưa cấu hình key.
-- Firebase project đã bật phương thức đăng nhập cần dùng nếu muốn kiểm thử xác thực Firebase/Google.
-- Thông tin PostgreSQL/Supabase nếu cần sử dụng đồng bộ dữ liệu lên cơ sở dữ liệu dùng chung.
+- A Supabase project with Google provider enabled and Google OAuth Client ID/Secret configured.
+- A Supabase project with Google provider enabled and Google OAuth Client ID/Secret configured.
 
 ## Cài đặt và chạy ở chế độ phát triển
 
@@ -67,8 +67,7 @@ Mở `.env` và cấu hình:
 
 Server tự đọc file `.env` bằng `dotenv`. Không dùng `.env.local` trừ khi tự cấu hình cách nạp file đó. Không commit `.env` hoặc chia sẻ API key, mật khẩu cơ sở dữ liệu và JWT secret.
 
-Frontend đọc cấu hình Firebase từ `firebase-applet-config.json`. Để kiểm thử xác thực, hãy dùng Firebase project phù hợp, bật provider đăng nhập cần thiết và thêm domain chạy ứng dụng vào danh sách Authorized domains của Firebase Authentication.
-
+Configure `SUPABASE_URL` and `SUPABASE_ANON_KEY` in `.env`, plus their `VITE_` counterparts. Enable Google under Supabase Authentication > Providers, add the Google OAuth Client ID and Secret, set the Google redirect URI to `https://<project-ref>.supabase.co/auth/v1/callback`, and allow `http://localhost:3000/**` in Supabase Auth URL Configuration.
 ### 4. Khởi chạy
 
 ```bash
@@ -120,8 +119,8 @@ Server mặc định chạy ở cổng `3000`.
 .
 ├── server.ts                  # Điểm khởi chạy Express và Vite
 ├── server/                    # API routes, xử lý dữ liệu và nghiệp vụ
-├── src/                       # Giao diện React, Firebase và tiện ích phía client
-├── backend/                   # Backend FastAPI riêng
+├── src/                       # Giao diện React, Supabase Auth và tiện ích phía client
+??? src/                       # React interface, Supabase Auth, and client utilities
 ├── data/                      # Dữ liệu JSON cục bộ (không commit)
 └── uploads/                   # Tệp tải lên cục bộ (không commit)
 ```
@@ -181,5 +180,5 @@ API docs có tại [http://localhost:8000/docs](http://localhost:8000/docs), hea
 
 - **Không mở được ứng dụng:** kiểm tra Node.js/npm đã cài và cổng `3000` chưa bị chương trình khác sử dụng.
 - **Tính năng Gemini không hoạt động:** kiểm tra `GEMINI_API_KEY` trong `.env`, rồi khởi động lại server.
-- **Đăng nhập Firebase/Google lỗi:** kiểm tra cấu hình Firebase, provider đăng nhập và Authorized domains.
-- **Không đồng bộ được PostgreSQL/Supabase:** kiểm tra thông tin kết nối, quyền truy cập mạng và cấu hình database; ứng dụng vẫn có thể lưu dữ liệu cục bộ trong `data/db.json`.
+- **Google sign-in errors:** check the Google provider and redirect URLs in Supabase Auth.
+- **Google sign-in errors:** check the Google provider and redirect URLs in Supabase Auth.
