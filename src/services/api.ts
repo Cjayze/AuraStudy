@@ -233,6 +233,29 @@ export const api = {
     return handleResponse(res);
   },
 
+  importQuizFromFile: async (file: File): Promise<{ quiz: QuizItem; question_count: number }> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const res = await fetch(`${BASE_URL}/quizzes/import`, {
+      method: 'POST',
+      headers: { ...getAuthHeader() },
+      body: formData
+    });
+    return handleResponse(res);
+  },
+
+  importQuizFromDocument: async (documentId: string): Promise<{ quiz: QuizItem; question_count: number }> => {
+    const res = await fetch(`${BASE_URL}/quizzes/import-document`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAuthHeader()
+      },
+      body: JSON.stringify({ document_id: documentId })
+    });
+    return handleResponse(res);
+  },
+
   submitQuiz: async (
     quizId: string,
     payload: {

@@ -1,9 +1,177 @@
 import { Router, Response } from 'express';
-import { getDb, saveDb, Quiz, Question, QuizAttempt, QuizAnswer, LearningProgress } from '../db';
+import multer from 'multer';
+import fs from 'fs';
+import path from 'path';
+import { getDb, saveDb, ensureDocumentCleanText, Quiz, Question, QuizAttempt, QuizAnswer, LearningProgress } from '../db';
 import { authenticateToken, AuthRequest } from '../auth';
 import { generateQuizFromDocument, analyzeQuizWeaknesses } from '../quizGenerator';
+import { extractTextFromFile, splitIntoChunks } from '../parser';
+import { normalizeUploadedFilename } from '../filename';
+import { parseMultipleChoiceExam } from '../quizImporter';
 
 export const quizRouter = Router();
+
+const importUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 25 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase();
+    if (['.pdf', '.docx', '.txt'].includes(ext)) return cb(null, true);
+    return cb(new Error('Định dạng chưa được hỗ trợ. Vui lòng tải lên file PDF, DOCX hoặc TXT.'));
+  }
+});
+
+const handleImportUpload = (req: any, res: Response, next: any) => {
+  importUpload.single('file')(req, res, (err: any) => {
+    if (!err) return next();
+    const message = err instanceof multer.MulterError && err.code === 'LIMIT_FILE_SIZE'
+      ? 'File vượt quá dung lượng tối đa 25MB.'
+      : err.message || 'File tải lên không hợp lệ.';
+    return res.status(400).json({ status: 'error', message });
+  });
+};
+
+function saveImportedQuiz(userId: string, documentId: string, title: string, importedQuestions: ReturnType<typeof parseMultipleChoiceExam>) {
+  const db = getDb();
+  const now = new Date().toISOString();
+  const quizId = `quiz_import_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+  const quiz: Quiz = {
+    id: quizId,
+    document_id: documentId,
+    user_id: userId,
+    title,
+    difficulty: 'medium',
+    total_questions: importedQuestions.length,
+    created_at: now
+  };
+  const questionRecords: Question[] = importedQuestions.map((question, index) => ({
+    id: `question_${quizId}_${index + 1}`,
+    quiz_id: quizId,
+    ...question
+  }));
+
+  db.quizzes.push(quiz);
+  db.questions.push(...questionRecords);
+
+  let progress = db.learning_progress.find((item) => item.user_id === userId);
+  if (!progress) {
+    progress = {
+      id: `prog_${userId}`,
+      user_id: userId,
+      total_documents: db.documents.filter((document) => document.user_id === userId).length,
+      total_questions_asked: 0,
+      total_quizzes_completed: 0,
+      average_score: 0,
+      last_active_at: now
+    };
+    db.learning_progress.push(progress);
+  }
+  progress.total_documents = db.documents.filter((document) => document.user_id === userId).length;
+  progress.last_active_at = now;
+  saveDb();
+  return quiz;
+}
+
+// Create a quiz using text already extracted and stored for a library document.
+quizRouter.post('/import-document', authenticateToken, async (req: AuthRequest, res: Response) => {
+  const documentId = String(req.body?.document_id || '');
+  const user = req.user!;
+  const db = getDb();
+  const document = db.documents.find((item) => item.id === documentId && item.user_id === user.id);
+  if (!document) {
+    return res.status(404).json({ status: 'error', message: 'Không tìm thấy file trong thư viện tài liệu của bạn.' });
+  }
+
+  try {
+    const extractedText = await ensureDocumentCleanText(document);
+    const importedQuestions = parseMultipleChoiceExam(extractedText);
+    const quiz = saveImportedQuiz(user.id, document.id, document.title, importedQuestions);
+    return res.status(201).json({
+      status: 'success',
+      message: `Đã nhập ${importedQuestions.length} câu hỏi từ file đã tải lên.`,
+      data: { quiz, question_count: importedQuestions.length }
+    });
+  } catch (error: any) {
+    return res.status(400).json({
+      status: 'error',
+      message: error?.message || 'Không thể nhận diện câu hỏi trắc nghiệm trong tài liệu này.'
+    });
+  }
+});
+
+// POST /api/quizzes/import - Import every question from a multiple-choice exam file.
+quizRouter.post('/import', authenticateToken, handleImportUpload, async (req: AuthRequest, res: Response) => {
+  const file = req.file;
+  if (!file) {
+    return res.status(400).json({ status: 'error', message: 'Vui lòng chọn file đề trắc nghiệm.' });
+  }
+
+  const originalName = normalizeUploadedFilename(file.originalname);
+  const extension = path.extname(originalName).toLowerCase().slice(1);
+  let extractedText: string;
+  let importedQuestions;
+
+  try {
+    extractedText = await extractTextFromFile(file.buffer, extension);
+    importedQuestions = parseMultipleChoiceExam(extractedText);
+  } catch (error: any) {
+    return res.status(400).json({
+      status: 'error',
+      message: error?.message || 'Không thể đọc câu hỏi trong file. Hãy kiểm tra định dạng và nội dung đề.'
+    });
+  }
+
+  const user = req.user!;
+  const db = getDb();
+  const now = new Date().toISOString();
+  const docId = `doc_quiz_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+  const uploadsDir = path.join(process.cwd(), 'uploads');
+  const filePath = `${docId}_${Date.now()}.${extension}`;
+
+  try {
+    fs.mkdirSync(uploadsDir, { recursive: true });
+    fs.writeFileSync(path.join(uploadsDir, filePath), file.buffer);
+
+    const title = path.parse(originalName).name || 'Imported multiple-choice exam';
+    const sourceDocument = {
+      id: docId,
+      user_id: user.id,
+      title,
+      subject: 'Đề trắc nghiệm',
+      file_name: originalName,
+      file_type: extension,
+      file_size: file.size,
+      file_path: `/uploads/${filePath}`,
+      status: 'ready' as const,
+      raw_text: extractedText,
+      created_at: now
+    };
+    db.documents.push(sourceDocument);
+    splitIntoChunks(extractedText, 600, 100).forEach((chunk) => {
+      db.document_chunks.push({
+        id: `chunk_${docId}_${chunk.chunk_index}`,
+        document_id: docId,
+        chunk_index: chunk.chunk_index,
+        content: chunk.content,
+        char_count: chunk.char_count,
+        vector_id: `vector_${docId}_${chunk.chunk_index}`
+      });
+    });
+    const quiz = saveImportedQuiz(user.id, docId, title, importedQuestions);
+
+    return res.status(201).json({
+      status: 'success',
+      message: `Đã nhập ${importedQuestions.length} câu hỏi từ file.`,
+      data: { quiz, question_count: importedQuestions.length }
+    });
+  } catch (error: any) {
+    try { fs.unlinkSync(path.join(uploadsDir, filePath)); } catch { /* Ignore cleanup errors. */ }
+    return res.status(500).json({
+      status: 'error',
+      message: error?.message || 'Không thể lưu đề thi đã nhập.'
+    });
+  }
+});
 
 // POST /api/quizzes/generate - Generate Quiz from Document with AI
 quizRouter.post('/generate', authenticateToken, async (req: AuthRequest, res: Response) => {
@@ -130,6 +298,7 @@ quizRouter.get('/:id', authenticateToken, (req: AuthRequest, res: Response) => {
       option_b: q.option_b,
       option_c: q.option_c,
       option_d: q.option_d,
+      ...(q.options?.length ? { options: q.options } : {}),
       ...(isReview ? { correct_ans: q.correct_ans, explanation: q.explanation } : {})
     }));
 
@@ -297,6 +466,7 @@ quizRouter.post('/:id/submit', authenticateToken, async (req: AuthRequest, res: 
           option_b: r.question.option_b,
           option_c: r.question.option_c,
           option_d: r.question.option_d,
+          ...(r.question.options?.length ? { options: r.question.options } : {}),
           selected_option: r.selected_option,
           correct_ans: r.question.correct_ans,
           is_correct: r.is_correct,
@@ -366,6 +536,7 @@ quizRouter.get('/attempts/:attempt_id', authenticateToken, (req: AuthRequest, re
         option_b: q.option_b,
         option_c: q.option_c,
         option_d: q.option_d,
+        ...(q.options?.length ? { options: q.options } : {}),
         selected_option: userAns ? userAns.selected_option : '',
         correct_ans: q.correct_ans,
         is_correct: userAns ? userAns.is_correct : false,

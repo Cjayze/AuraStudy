@@ -1,4 +1,4 @@
-import { pgTable, text, integer, boolean, timestamp } from 'drizzle-orm/pg-core';
+import { pgTable, text, integer, boolean, timestamp, jsonb } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
 // Users table supporting Supabase Auth UID and traditional user IDs
@@ -78,6 +78,7 @@ export const questions = pgTable('questions', {
   optionB: text('option_b').notNull(),
   optionC: text('option_c').notNull(),
   optionD: text('option_d').notNull(),
+  options: jsonb('options').$type<string[]>(),
   correctAns: text('correct_ans').notNull(),
   explanation: text('explanation')
 });

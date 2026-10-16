@@ -88,7 +88,8 @@ export interface Question {
   option_b: string;
   option_c: string;
   option_d: string;
-  correct_ans?: 'A' | 'B' | 'C' | 'D';
+  options?: string[];
+  correct_ans?: string;
   explanation?: string;
   concept_tested?: string;
 }
@@ -106,6 +107,7 @@ export interface QuizEvaluationResult {
   option_b: string;
   option_c: string;
   option_d: string;
+  options?: string[];
   selected_option: string;
   correct_ans: string;
   is_correct: boolean;

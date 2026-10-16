@@ -80,7 +80,8 @@ export interface Question {
   option_b: string;
   option_c: string;
   option_d: string;
-  correct_ans: 'A' | 'B' | 'C' | 'D';
+  options?: string[];
+  correct_ans: string;
   explanation: string;
   concept_tested?: string;
 }
@@ -417,6 +418,7 @@ export async function syncToPostgres(): Promise<void> {
   if (!db) return;
   try {
     const pool = createPool();
+    await pool.query('ALTER TABLE "questions" ADD COLUMN IF NOT EXISTS "options" jsonb');
     // 1. Sync users
     for (const u of db.users) {
       if (u.id === 'usr_student_01' || u.email === 'student@aurastudy.edu.vn') continue;
@@ -454,10 +456,10 @@ export async function syncToPostgres(): Promise<void> {
 
     for (const item of (db.questions || [])) {
       await pool.query(
-        `INSERT INTO "questions" (id, quiz_id, question_text, option_a, option_b, option_c, option_d, correct_ans, explanation)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+        `INSERT INTO "questions" (id, quiz_id, question_text, option_a, option_b, option_c, option_d, correct_ans, explanation, options)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10::jsonb)
          ON CONFLICT (id) DO NOTHING;`,
-        [item.id, item.quiz_id, item.question_text, item.option_a || '', item.option_b || '', item.option_c || '', item.option_d || '', item.correct_ans || 'A', item.explanation || '']
+        [item.id, item.quiz_id, item.question_text, item.option_a || '', item.option_b || '', item.option_c || '', item.option_d || '', item.correct_ans || 'A', item.explanation || '', item.options ? JSON.stringify(item.options) : null]
       );
     }
 

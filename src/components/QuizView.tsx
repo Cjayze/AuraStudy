@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { QuizItem, QuizDetail, QuizSubmitResult, DocumentItem } from '../types';
+import { QuizItem, QuizDetail, QuizSubmitResult, DocumentItem, Question } from '../types';
 import { api } from '../services/api';
 import {
   CheckSquare,
   Sparkles,
+  Upload,
+  FileText,
   Plus,
   Play,
   Clock,
@@ -30,6 +32,13 @@ interface QuizViewProps {
   onClearPreSelectedDoc?: () => void;
 }
 
+function getQuestionOptions(question: Pick<Question, 'options' | 'option_a' | 'option_b' | 'option_c' | 'option_d'>) {
+  const sourceOptions = question.options?.length
+    ? question.options
+    : [question.option_a, question.option_b, question.option_c, question.option_d].filter((option) => option.trim());
+  return sourceOptions.map((text, index) => ({ key: String.fromCharCode(65 + index), text }));
+}
+
 export const QuizView: React.FC<QuizViewProps> = ({
   quizzes,
   documents,
@@ -40,6 +49,9 @@ export const QuizView: React.FC<QuizViewProps> = ({
 }) => {
   // Modal & Flow states
   const [isGeneratorOpen, setIsGeneratorOpen] = useState(false);
+  const [generatorMode, setGeneratorMode] = useState<'choose' | 'document' | 'file'>('choose');
+  const [importFile, setImportFile] = useState<File | null>(null);
+  const [sourceDocumentForQuiz, setSourceDocumentForQuiz] = useState<DocumentItem | null>(null);
   const [genDocumentId, setGenDocumentId] = useState('');
   const [genDifficulty, setGenDifficulty] = useState<'easy' | 'medium' | 'hard'>('medium');
   const [genQuestionCount, setGenQuestionCount] = useState(5);
@@ -64,6 +76,13 @@ export const QuizView: React.FC<QuizViewProps> = ({
   const [deleteQuizLoading, setDeleteQuizLoading] = useState(false);
   const [quizNotification, setQuizNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
+  const closeQuizCreator = () => {
+    setIsGeneratorOpen(false);
+    setImportFile(null);
+    setSourceDocumentForQuiz(null);
+    setGenError(null);
+  };
+
   useEffect(() => {
     if (quizNotification) {
       const timer = setTimeout(() => setQuizNotification(null), 4000);
@@ -75,6 +94,8 @@ export const QuizView: React.FC<QuizViewProps> = ({
   useEffect(() => {
     if (preSelectedDoc) {
       setGenDocumentId(preSelectedDoc.id);
+      setSourceDocumentForQuiz(preSelectedDoc);
+      setGeneratorMode('choose');
       setIsGeneratorOpen(true);
       if (onClearPreSelectedDoc) onClearPreSelectedDoc();
     }
@@ -117,11 +138,36 @@ export const QuizView: React.FC<QuizViewProps> = ({
         question_count: genQuestionCount,
         custom_topic: genCustomTopic || undefined
       });
-      setIsGeneratorOpen(false);
+      closeQuizCreator();
       setGenCustomTopic('');
       onRefresh();
     } catch (err: any) {
       setGenError(err?.message || 'Có lỗi xảy ra khi tạo đề thi.');
+    } finally {
+      setGenLoading(false);
+    }
+  };
+
+  const handleImportQuiz = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!sourceDocumentForQuiz && !importFile) {
+      setGenError('Vui lòng chọn file đề trắc nghiệm.');
+      return;
+    }
+    setGenLoading(true);
+    setGenError(null);
+    try {
+      const result = sourceDocumentForQuiz
+        ? await api.importQuizFromDocument(sourceDocumentForQuiz.id)
+        : await api.importQuizFromFile(importFile!);
+      closeQuizCreator();
+      setQuizNotification({
+        type: 'success',
+        message: `Đã nhập ${result.question_count} câu hỏi. Bộ đề đã sẵn sàng để làm.`
+      });
+      onRefresh();
+    } catch (err: any) {
+      setGenError(err?.message || 'Không thể đọc đề trắc nghiệm trong file.');
     } finally {
       setGenLoading(false);
     }
@@ -297,10 +343,9 @@ export const QuizView: React.FC<QuizViewProps> = ({
               {q.question_text}
             </h3>
 
-            {/* 4 Options */}
+            {/* Answer options */}
             <div className="space-y-3">
-              {(['A', 'B', 'C', 'D'] as const).map((optKey) => {
-                const optText = (q as any)[`option_${optKey.toLowerCase()}`];
+              {getQuestionOptions(q).map(({ key: optKey, text: optText }) => {
                 const isSelected = userAnswers[q.id] === optKey;
 
                 return (
@@ -507,8 +552,7 @@ export const QuizView: React.FC<QuizViewProps> = ({
 
               {/* Options Breakdown */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-                {(['A', 'B', 'C', 'D'] as const).map((opt) => {
-                  const text = (r as any)[`option_${opt.toLowerCase()}`];
+                {getQuestionOptions(r).map(({ key: opt, text }) => {
                   const isUserPick = r.selected_option === opt;
                   const isCorrectPick = r.correct_ans === opt;
 
@@ -587,15 +631,18 @@ export const QuizView: React.FC<QuizViewProps> = ({
         <button
           id="open-quiz-generator-btn"
           onClick={() => {
+            setSourceDocumentForQuiz(null);
             if (documents.length > 0 && !genDocumentId) {
               setGenDocumentId(documents[0].id);
             }
+            setGeneratorMode('choose');
+            setGenError(null);
             setIsGeneratorOpen(true);
           }}
           className="px-4 py-2.5 bg-orange-500 hover:bg-orange-600 active:bg-orange-700 text-white text-xs sm:text-sm font-semibold rounded-xl shadow-md shadow-orange-100 flex items-center justify-center gap-2 transition-all cursor-pointer"
         >
           <Sparkles className="w-4 h-4 text-amber-200" />
-          <span>Sinh đề thi bằng AI</span>
+          <span>Tạo đề thi</span>
         </button>
       </div>
 
@@ -610,10 +657,15 @@ export const QuizView: React.FC<QuizViewProps> = ({
           <CheckSquare className="w-12 h-12 text-slate-300 mx-auto mb-3" />
           <h3 className="text-base font-semibold text-slate-700">Chưa có đề thi nào</h3>
           <p className="text-xs text-slate-400 max-w-sm mx-auto mt-1 mb-4">
-            Chọn một tài liệu trong thư viện và nhấn "Sinh đề thi bằng AI" để tạo bài kiểm tra trắc nghiệm tức thì.
+            Tạo đề từ tài liệu học tập hoặc nhập nguyên bộ câu hỏi từ file trắc nghiệm của bạn.
           </p>
           <button
-            onClick={() => setIsGeneratorOpen(true)}
+            onClick={() => {
+              setSourceDocumentForQuiz(null);
+              setGeneratorMode('choose');
+              setGenError(null);
+              setIsGeneratorOpen(true);
+            }}
             className="px-4 py-2 bg-orange-50 text-orange-600 hover:bg-orange-100 border border-orange-200/60 rounded-xl text-xs font-semibold cursor-pointer"
           >
             Tạo đề thi đầu tiên
@@ -686,22 +738,26 @@ export const QuizView: React.FC<QuizViewProps> = ({
         </div>
       )}
 
-      {/* AI Quiz Generator Modal */}
+      {/* Quiz creation chooser and forms */}
       {isGeneratorOpen && (
         <div id="quiz-gen-modal-backdrop" className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
           <div id="quiz-gen-modal" className="bg-white rounded-2xl shadow-2xl border border-slate-200 max-w-lg w-full p-6 relative">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
-                  <Sparkles className="w-4 h-4 text-amber-500 fill-amber-400" />
+                  {generatorMode === 'file' ? <Upload className="w-4 h-4" /> : <Sparkles className="w-4 h-4 text-amber-500 fill-amber-400" />}
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-slate-900">Sinh đề trắc nghiệm bằng Aura AI</h3>
-                  <p className="text-xs text-slate-500">Trích xuất kiến thức cốt lõi và tạo đề thi tự động</p>
+                  <h3 className="text-base font-bold text-slate-900">
+                    {generatorMode === 'choose' ? 'Tạo đề thi trắc nghiệm' : generatorMode === 'document' ? 'Tạo đề từ tài liệu' : 'Tạo quiz từ file trắc nghiệm'}
+                  </h3>
+                  <p className="text-xs text-slate-500">
+                    {generatorMode === 'choose' ? 'Chọn cách tạo đề phù hợp với bạn' : generatorMode === 'document' ? 'Aura AI tạo câu hỏi từ nội dung tài liệu' : 'Nhập toàn bộ câu hỏi và đáp án có sẵn trong file'}
+                  </p>
                 </div>
               </div>
               <button
-                onClick={() => setIsGeneratorOpen(false)}
+                onClick={closeQuizCreator}
                 className="p-1 text-slate-400 hover:text-slate-600 rounded-lg cursor-pointer"
               >
                 <X className="w-5 h-5" />
@@ -715,7 +771,42 @@ export const QuizView: React.FC<QuizViewProps> = ({
               </div>
             )}
 
-            <form onSubmit={handleGenerateQuiz} className="space-y-4">
+            {generatorMode === 'choose' && (
+              <div className="space-y-3">
+                <button
+                  type="button"
+                  onClick={() => { setGeneratorMode('document'); setGenError(null); }}
+                  className="w-full rounded-2xl border border-blue-200 bg-blue-50/70 p-4 text-left transition hover:border-blue-400 hover:bg-blue-50"
+                >
+                  <span className="flex items-center gap-3">
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white"><Sparkles className="h-5 w-5" /></span>
+                    <span>
+                      <span className="block text-sm font-bold text-slate-900">Tạo đề từ tài liệu</span>
+                      <span className="mt-1 block text-xs leading-5 text-slate-600">Dùng Aura AI tạo 3, 5, 10 hoặc 15 câu từ tài liệu học tập.</span>
+                    </span>
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setGeneratorMode('file'); setGenError(null); }}
+                  className="w-full rounded-2xl border border-violet-200 bg-violet-50/60 p-4 text-left transition hover:border-violet-400 hover:bg-violet-50"
+                >
+                  <span className="flex items-center gap-3">
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-violet-600 text-white"><Upload className="h-5 w-5" /></span>
+                    <span>
+                      <span className="block text-sm font-bold text-slate-900">{sourceDocumentForQuiz ? 'Tạo quiz từ file đã tải lên' : 'Tạo quiz từ file câu hỏi trắc nghiệm'}</span>
+                      <span className="mt-1 block text-xs leading-5 text-slate-600">
+                        {sourceDocumentForQuiz
+                          ? `Dùng trực tiếp “${sourceDocumentForQuiz.file_name}”, không cần tải lại.`
+                          : 'Nhập tất cả câu hỏi từ file và giữ nguyên nội dung, đáp án, ngôn ngữ gốc.'}
+                      </span>
+                    </span>
+                  </span>
+                </button>
+              </div>
+            )}
+
+            {generatorMode === 'document' && <form onSubmit={handleGenerateQuiz} className="space-y-4">
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">Tài liệu nguồn</label>
                 <select
@@ -793,7 +884,7 @@ export const QuizView: React.FC<QuizViewProps> = ({
               <div className="pt-2 flex justify-end gap-2">
                 <button
                   type="button"
-                  onClick={() => setIsGeneratorOpen(false)}
+                onClick={closeQuizCreator}
                   className="px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-xl cursor-pointer"
                 >
                   Hủy bỏ
@@ -814,7 +905,64 @@ export const QuizView: React.FC<QuizViewProps> = ({
                   )}
                 </button>
               </div>
-            </form>
+            </form>}
+
+            {generatorMode === 'file' && (
+              <form onSubmit={handleImportQuiz} className="space-y-4">
+                {sourceDocumentForQuiz ? (
+                  <div className="flex items-center gap-3 rounded-2xl border border-blue-200 bg-blue-50/70 p-4">
+                    <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white text-blue-600"><FileText className="h-5 w-5" /></span>
+                    <span className="min-w-0">
+                      <span className="block truncate text-sm font-semibold text-slate-800">{sourceDocumentForQuiz.file_name}</span>
+                      <span className="mt-1 block text-xs text-slate-500">Đã có trong thư viện · {sourceDocumentForQuiz.file_type.toUpperCase()}</span>
+                    </span>
+                  </div>
+                ) : <label
+                  htmlFor="quiz-source-file"
+                  className="flex min-h-36 cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 px-5 py-6 text-center transition hover:border-blue-400 hover:bg-blue-50/50"
+                >
+                  <FileText className="mb-2 h-8 w-8 text-blue-600" />
+                  <span className="text-sm font-semibold text-slate-800">
+                    {importFile ? importFile.name : 'Chọn file đề trắc nghiệm'}
+                  </span>
+                  <span className="mt-1 text-xs text-slate-500">PDF, DOCX hoặc TXT · tối đa 25 MB</span>
+                  <input
+                    id="quiz-source-file"
+                    type="file"
+                    accept=".pdf,.docx,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain"
+                    className="sr-only"
+                    onChange={(event) => { setImportFile(event.target.files?.[0] || null); setGenError(null); }}
+                  />
+                </label>}
+                <div className="rounded-xl border border-blue-100 bg-blue-50/70 p-3 text-xs leading-5 text-slate-600">
+                  <strong className="font-semibold text-slate-700">Lưu ý khi chuẩn bị file</strong>
+                  <ul className="mt-1 list-disc space-y-1 pl-4">
+                    <li>Đánh số từng câu; mỗi lựa chọn để riêng một dòng và bắt đầu bằng A., B., C., D. (có thể tiếp tục đến Z.).</li>
+                    <li>Đặt đáp án đúng ngay dưới câu theo dạng “Đáp án: B”, hoặc đánh dấu lựa chọn đúng bằng ✓, [x], “(Đúng)” hay “(Correct)”.</li>
+                    <li>Nếu đáp án ở cuối file, ghi rõ “Đáp án” rồi ghép số câu với chữ cái, ví dụ: “1A - 2C - 3B”; có thể để nhiều cặp trên một dòng hoặc mỗi dòng riêng.</li>
+                    <li>Với bảng, nên có cột riêng cho số câu và đáp án. Mỗi câu cần có một đáp án hợp lệ khớp với nhãn lựa chọn.</li>
+                  </ul>
+                </div>
+                {!sourceDocumentForQuiz && <p className="text-[11px] text-slate-500">File nhập cũng được lưu trong Thư viện tài liệu để bạn có thể xem lại.</p>}
+                <div className="flex justify-between gap-2 pt-1">
+                  <button
+                    type="button"
+                    onClick={() => { setGeneratorMode('choose'); setImportFile(null); setGenError(null); }}
+                    className="rounded-xl px-4 py-2 text-xs font-medium text-slate-600 transition hover:bg-slate-100"
+                  >
+                    Quay lại
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={genLoading || (!sourceDocumentForQuiz && !importFile)}
+                    className="flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-xs font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {genLoading ? <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" /> : <Upload className="h-4 w-4" />}
+                    {sourceDocumentForQuiz ? 'Tạo quiz từ file này' : 'Tải lên và tạo quiz'}
+                  </button>
+                </div>
+              </form>
+            )}
           </div>
         </div>
       )}
