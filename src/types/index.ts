@@ -138,6 +138,8 @@ export interface DocumentSummary {
   summary: string;
   key_concepts?: string[];
   bullet_points?: string[];
+  conclusion?: string;
+  keywords?: string[];
   exam_tips?: string[];
   word_count?: number;
 }

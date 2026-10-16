@@ -167,7 +167,7 @@ export const api = {
   askQuestion: async (payload: {
     question: string;
     document_id?: string;
-    history?: Array<{ role: string; content: string }>;
+    session_id?: string;
   }): Promise<{
     answer: string;
     retrieved_context: Array<{
@@ -175,8 +175,9 @@ export const api = {
       similarity_score: number;
       chunk_text: string;
     }>;
-    suggested_questions: string[];
-    model_used: string;
+    suggested_questions?: string[];
+    model_used?: string;
+    session_id: string;
   }> => {
     const res = await fetch(`${BASE_URL}/chat/ask`, {
       method: 'POST',
@@ -186,7 +187,32 @@ export const api = {
       },
       body: JSON.stringify(payload)
     });
-    return handleResponse(res);
+    const result = await handleResponse<{
+      session?: { id?: string };
+      ai_message?: { content?: string };
+      answer?: string;
+      sources?: Array<{
+        document_title: string;
+        similarity_score: number;
+        content?: string;
+        chunk_text?: string;
+      }>;
+      retrieved_context?: Array<{ document_title: string; similarity_score: number; chunk_text: string }>;
+      suggested_questions?: string[];
+      model_used?: string;
+    }>(res);
+
+    return {
+      answer: result.answer || result.ai_message?.content || '',
+      retrieved_context: result.retrieved_context || (result.sources || []).map((source) => ({
+        document_title: source.document_title,
+        similarity_score: source.similarity_score,
+        chunk_text: source.chunk_text || source.content || ''
+      })),
+      suggested_questions: result.suggested_questions || [],
+      model_used: result.model_used,
+      session_id: result.session?.id || ''
+    };
   },
 
   summarizeDocument: async (documentId: string, type: 'short' | 'bullet' | 'detailed' = 'bullet'): Promise<DocumentSummary> => {

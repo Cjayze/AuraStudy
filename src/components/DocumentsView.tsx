@@ -21,12 +21,21 @@ import {
 } from 'lucide-react';
 
 const cleanSummaryText = (text: string) => text
-  .replace(/^(\s*)#{1,6}\s*/gm, '$1\u0000')
-  .replace(/^(\s*)(?:[-+\u2022\u25cf\u25aa.]|\d+[.)])\s+/gm, '$1+ ')
-  .replace(/\u0000/g, '- ')
+  .replace(/&#(?:x([\da-f]+)|(\d+));?/gi, (entity, hex, decimal) => {
+    const codePoint = Number.parseInt(hex || decimal, hex ? 16 : 10);
+    return codePoint > 0 && codePoint <= 0x10ffff ? String.fromCodePoint(codePoint) : entity;
+  })
+  .replace(/&amp;/gi, '&')
+  .replace(/&lt;/gi, '<')
+  .replace(/&gt;/gi, '>')
+  .replace(/&quot;/gi, '"')
+  .replace(/&#39;|&apos;/gi, "'")
+  .replace(/\\([#*+._-])/g, '$1')
+  .replace(/^(\s*)#{1,6}\s*/gm, '$1- ')
   .replace(/\p{Extended_Pictographic}/gu, '')
   .replace(/[*_`~]/g, '')
-  .replace(/[\u2022\u25cf\u25aa]/g, '-')
+  .replace(/^(\s*)(?:[-+\u2022\u25cf\u25aa.]|\d+[.)])\s*(?:\+\s*)?/gm, '$1+ ')
+  .replace(/[\u2022\u25cf\u25aa]/g, '+')
   .replace(/[ \t]+\n/g, '\n')
   .trim();
 
@@ -591,9 +600,9 @@ export const DocumentsView: React.FC<DocumentsViewProps> = ({
 
       {/* AI Summary Modal */}
       {summaryDoc && (
-        <div id="summary-doc-modal-backdrop" className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
-          <div id="summary-doc-modal" className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full p-6 sm:p-8 relative max-h-[90vh] flex flex-col">
-            <div className="flex items-center justify-between pb-5 border-b border-slate-100">
+        <div id="summary-doc-modal-backdrop" className="fixed inset-0 z-50 flex overflow-y-auto items-start sm:items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+          <div id="summary-doc-modal" className="my-auto bg-white rounded-2xl shadow-2xl max-w-4xl w-full p-6 sm:p-8 relative max-h-[calc(100vh-2rem)] flex flex-col">
+            <div className="flex shrink-0 items-center justify-between pb-5 border-b border-slate-100">
               <div className="flex items-center gap-2">
                 <div>
                   <h3 className="text-xl font-bold text-slate-900">Tóm tắt thông minh Aura AI</h3>
@@ -611,7 +620,7 @@ export const DocumentsView: React.FC<DocumentsViewProps> = ({
               </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto py-6 text-base text-slate-800 space-y-7 leading-8">
+            <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain py-6 text-base text-slate-800 space-y-7 leading-8">
               {summaryLoading ? (
                 <div className="text-center py-12">
                   <div className="w-8 h-8 border-3 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
@@ -620,7 +629,7 @@ export const DocumentsView: React.FC<DocumentsViewProps> = ({
               ) : summaryData ? (
                 <div className="space-y-7">
                   <div>
-                    <p className="font-bold text-slate-900 text-lg mb-3">Bản tóm tắt chuyên sâu:</p>
+                    <p className="font-bold text-slate-900 text-lg mb-3">Tổng quan nội dung:</p>
                     <div className="whitespace-pre-wrap text-slate-700 leading-8 text-base sm:text-lg">
                       {cleanSummaryText(summaryData.summary)}
                     </div>
@@ -637,6 +646,42 @@ export const DocumentsView: React.FC<DocumentsViewProps> = ({
                           </li>
                         ))}
                       </ul>
+                    </div>
+                  )}
+
+                  {summaryData.key_concepts && summaryData.key_concepts.length > 0 && (
+                    <div>
+                      <p className="font-bold text-slate-900 text-lg mb-3">Khái niệm và thuật ngữ quan trọng:</p>
+                      <ul className="space-y-3">
+                        {summaryData.key_concepts.map((concept, i) => (
+                          <li key={i} className="flex items-start gap-3 text-base sm:text-lg text-slate-700 leading-8">
+                            <span className="w-4 text-blue-600 font-bold shrink-0">+</span>
+                            <span>{cleanSummaryText(concept)}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {summaryData.conclusion && (
+                    <div className="border-t border-slate-200 pt-5">
+                      <p className="font-bold text-slate-900 text-lg mb-3">Kết luận:</p>
+                      <div className="whitespace-pre-wrap text-slate-700 leading-8 text-base sm:text-lg">
+                        {cleanSummaryText(summaryData.conclusion)}
+                      </div>
+                    </div>
+                  )}
+
+                  {summaryData.keywords && summaryData.keywords.length > 0 && (
+                    <div>
+                      <p className="font-bold text-slate-900 text-lg mb-3">Từ khóa:</p>
+                      <div className="flex flex-wrap gap-2">
+                        {summaryData.keywords.map((keyword, i) => (
+                          <span key={i} className="rounded-full bg-blue-50 px-3 py-1 text-sm font-medium text-blue-700">
+                            {cleanSummaryText(keyword)}
+                          </span>
+                        ))}
+                      </div>
                     </div>
                   )}
 
