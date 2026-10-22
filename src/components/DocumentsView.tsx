@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
+import { BrandMark } from './BrandMark';
 import { DocumentItem, DocumentSummary, User } from '../types';
 import { api } from '../services/api';
+import { Language, translateText } from '../i18n';
 import {
   UploadCloud,
   Search,
   Filter,
   FileText,
   Trash2,
-  Sparkles,
   CheckCircle2,
   Clock,
   Layers,
@@ -47,6 +48,7 @@ interface DocumentsViewProps {
   onRefresh: () => void;
   onSelectDocumentForChat: (doc: DocumentItem) => void;
   onSelectDocumentForQuiz: (doc: DocumentItem) => void;
+  language?: Language;
 }
 
 export const DocumentsView: React.FC<DocumentsViewProps> = ({
@@ -56,8 +58,10 @@ export const DocumentsView: React.FC<DocumentsViewProps> = ({
   onOpenAuth,
   onRefresh,
   onSelectDocumentForChat,
-  onSelectDocumentForQuiz
+  onSelectDocumentForQuiz,
+  language = 'vi'
 }) => {
+  const t = (text: string) => translateText(language, text);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedSubject, setSelectedSubject] = useState('all');
   const [isUploadOpen, setIsUploadOpen] = useState(false);
@@ -261,7 +265,7 @@ export const DocumentsView: React.FC<DocumentsViewProps> = ({
       {/* Header with Search & Upload Button */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">Thư viện tài liệu học tập</h1>
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">{t("Thư viện tài liệu học tập")}</h1>
           <p className="text-xs sm:text-sm text-slate-500">
             Quản lý tài liệu môn học, phân tách đoạn văn bản tự động để phục vụ AI RAG và sinh đề thi
           </p>
@@ -279,7 +283,7 @@ export const DocumentsView: React.FC<DocumentsViewProps> = ({
           className="px-4 py-2.5 bg-orange-500 hover:bg-orange-600 active:bg-orange-700 text-white text-xs sm:text-sm font-semibold rounded-xl shadow-md shadow-orange-100 flex items-center justify-center gap-2 transition-all cursor-pointer"
         >
           <UploadCloud className="w-4 h-4" />
-          <span>Tải tài liệu mới</span>
+          <span>{t("Tải tài liệu mới")}</span>
         </button>
       </div>
 
@@ -290,7 +294,7 @@ export const DocumentsView: React.FC<DocumentsViewProps> = ({
           <input
             id="doc-search-input"
             type="text"
-            placeholder="Tìm theo tên bài giảng, môn học..."
+            placeholder={t("Tìm theo tên bài giảng, môn học...")}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full pl-9 pr-4 py-2 text-xs sm:text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -321,12 +325,12 @@ export const DocumentsView: React.FC<DocumentsViewProps> = ({
       {loading ? (
         <div className="text-center py-12">
           <div className="w-8 h-8 border-3 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
-          <p className="text-xs text-slate-500">Đang tải danh sách tài liệu...</p>
+          <p className="text-xs text-slate-500">{t("Đang tải danh sách tài liệu...")}</p>
         </div>
       ) : filteredDocs.length === 0 ? (
         <div className="bg-white rounded-2xl border border-dashed border-slate-200 p-12 text-center">
           <FileSpreadsheet className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-          <h3 className="text-base font-semibold text-slate-700">Chưa tìm thấy tài liệu phù hợp</h3>
+          <h3 className="text-base font-semibold text-slate-700">{t("Chưa tìm thấy tài liệu phù hợp")}</h3>
           <p className="text-xs text-slate-400 max-w-sm mx-auto mt-1 mb-4">
             Hãy thử tìm kiếm với từ khóa khác hoặc tải lên tài liệu mới để bắt đầu học tập cùng Aura AI.
           </p>
@@ -355,7 +359,7 @@ export const DocumentsView: React.FC<DocumentsViewProps> = ({
                     <button
                       id={`preview-doc-btn-${doc.id}`}
                       onClick={() => handleOpenPreview(doc)}
-                      title="Xem nội dung chi tiết"
+                      title={t("Xem nội dung chi tiết")}
                       className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
                     >
                       <Eye className="w-4 h-4" />
@@ -363,7 +367,7 @@ export const DocumentsView: React.FC<DocumentsViewProps> = ({
                     <button
                       id={`delete-doc-btn-${doc.id}`}
                       onClick={() => setDeleteConfirmDoc(doc)}
-                      title="Xóa tài liệu"
+                      title={t("Xóa tài liệu")}
                       className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -400,8 +404,8 @@ export const DocumentsView: React.FC<DocumentsViewProps> = ({
                     onClick={() => onSelectDocumentForChat(doc)}
                     className="py-1.5 px-2 bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-semibold rounded-xl flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
                   >
-                    <Sparkles className="w-3.5 h-3.5 text-blue-600" />
-                    <span>Hỏi Aura AI</span>
+                    <BrandMark className="w-3.5 h-3.5 text-blue-600" />
+                    <span>{t("Hỏi Aura AI")}</span>
                   </button>
                   <button
                     id={`summary-action-btn-${doc.id}`}
@@ -409,7 +413,7 @@ export const DocumentsView: React.FC<DocumentsViewProps> = ({
                     className="py-1.5 px-2 bg-sky-50 hover:bg-sky-100 text-sky-700 text-xs font-semibold rounded-xl flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
                   >
                     <BookOpen className="w-3.5 h-3.5 text-sky-600" />
-                    <span>Tóm tắt nội dung</span>
+                    <span>{t("Tóm tắt nội dung")}</span>
                   </button>
                 </div>
 
@@ -419,7 +423,7 @@ export const DocumentsView: React.FC<DocumentsViewProps> = ({
                   className="w-full py-2 px-2 bg-orange-500 hover:bg-orange-600 active:bg-orange-700 text-white text-xs font-semibold rounded-xl flex items-center justify-center gap-1.5 transition-colors shadow-2xs shadow-orange-100 cursor-pointer"
                 >
                   <Layers className="w-3.5 h-3.5" />
-                  <span>Tạo đề thi trắc nghiệm</span>
+                  <span>{t("Tạo đề thi trắc nghiệm")}</span>
                 </button>
               </div>
             </div>
@@ -437,8 +441,8 @@ export const DocumentsView: React.FC<DocumentsViewProps> = ({
                   <UploadCloud className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-slate-900">Tải tài liệu học tập mới</h3>
-                  <p className="text-xs text-slate-500">Hỗ trợ các định dạng .pdf, .txt, .docx</p>
+                  <h3 className="text-base font-bold text-slate-900">{t("Tải tài liệu học tập mới")}</h3>
+                  <p className="text-xs text-slate-500">{t("Hỗ trợ các định dạng .pdf, .txt, .docx")}</p>
                 </div>
               </div>
               <button
@@ -458,7 +462,7 @@ export const DocumentsView: React.FC<DocumentsViewProps> = ({
 
             <form onSubmit={handleUpload} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Tệp tài liệu (PDF, DOCX, TXT, MD)</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">{t("Tệp tài liệu (PDF, DOCX, TXT, MD)")}</label>
                 <div
                   onDragOver={handleDragOver}
                   onDragLeave={handleDragLeave}
@@ -487,7 +491,7 @@ export const DocumentsView: React.FC<DocumentsViewProps> = ({
                         type="button"
                         onClick={() => setFile(null)}
                         className="p-1 hover:text-rose-600 cursor-pointer"
-                        title="Bỏ chọn tệp"
+                        title={t("Bỏ chọn tệp")}
                       >
                         <X className="w-3.5 h-3.5" />
                       </button>
@@ -497,12 +501,12 @@ export const DocumentsView: React.FC<DocumentsViewProps> = ({
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Tiêu đề giáo trình / bài giảng</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">{t("Tiêu đề giáo trình / bài giảng")}</label>
                 <input
                   id="doc-title-input"
                   type="text"
                   required
-                  placeholder="Ví dụ: Hệ Quản Trị CSDL - Chương 5"
+                  placeholder={t("Ví dụ: Hệ Quản Trị CSDL - Chương 5")}
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   className="w-full px-3.5 py-2 text-sm border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -510,12 +514,12 @@ export const DocumentsView: React.FC<DocumentsViewProps> = ({
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Môn học / Chuyên ngành</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">{t("Môn học / Chuyên ngành")}</label>
                 <input
                   id="doc-subject-input"
                   type="text"
                   required
-                  placeholder="Ví dụ: Cơ sở dữ liệu, Mạng máy tính..."
+                  placeholder={t("Ví dụ: Cơ sở dữ liệu, Mạng máy tính...")}
                   value={subject}
                   onChange={(e) => setSubject(e.target.value)}
                   className="w-full px-3.5 py-2 text-sm border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -541,7 +545,7 @@ export const DocumentsView: React.FC<DocumentsViewProps> = ({
                   ) : (
                     <>
                       <UploadCloud className="w-4 h-4" />
-                      <span>Xử lý & Tải lên</span>
+                      <span>{t("Xử lý & Tải lên")}</span>
                     </>
                   )}
                 </button>
@@ -572,7 +576,7 @@ export const DocumentsView: React.FC<DocumentsViewProps> = ({
               {previewLoading ? (
                 <div className="text-center py-10">
                   <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
-                  <p className="text-xs text-slate-400">Đang đọc nội dung bài học...</p>
+                  <p className="text-xs text-slate-400">{t("Đang đọc nội dung bài học...")}</p>
                 </div>
               ) : (
                 <pre className="whitespace-pre-wrap font-sans bg-slate-50 p-4 rounded-xl border border-slate-200/80 text-xs">
@@ -590,8 +594,8 @@ export const DocumentsView: React.FC<DocumentsViewProps> = ({
                 }}
                 className="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-xl flex items-center gap-1.5 cursor-pointer"
               >
-                <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-                <span>Hỏi đáp AI với tài liệu này</span>
+                <BrandMark className="w-3.5 h-3.5 text-amber-300" />
+                <span>{t("Hỏi đáp AI với tài liệu này")}</span>
               </button>
             </div>
           </div>
@@ -605,7 +609,7 @@ export const DocumentsView: React.FC<DocumentsViewProps> = ({
             <div className="flex shrink-0 items-center justify-between pb-5 border-b border-slate-100">
               <div className="flex items-center gap-2">
                 <div>
-                  <h3 className="text-xl font-bold text-slate-900">Tóm tắt thông minh Aura AI</h3>
+                  <h3 className="text-xl font-bold text-slate-900">{t("Tóm tắt thông minh Aura AI")}</h3>
                   <p className="text-sm text-slate-500 mt-1">{summaryDoc.title}</p>
                 </div>
               </div>
@@ -624,12 +628,12 @@ export const DocumentsView: React.FC<DocumentsViewProps> = ({
               {summaryLoading ? (
                 <div className="text-center py-12">
                   <div className="w-8 h-8 border-3 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
-                  <p className="text-base text-slate-600 font-medium">Aura AI đang đọc và phân tích chuyên sâu nội dung bài giảng...</p>
+                  <p className="text-base text-slate-600 font-medium">{t("Aura AI đang đọc và phân tích chuyên sâu nội dung bài giảng...")}</p>
                 </div>
               ) : summaryData ? (
                 <div className="space-y-7">
                   <div>
-                    <p className="font-bold text-slate-900 text-lg mb-3">Tổng quan nội dung:</p>
+                    <p className="font-bold text-slate-900 text-lg mb-3">{t("Tổng quan nội dung:")}</p>
                     <div className="whitespace-pre-wrap text-slate-700 leading-8 text-base sm:text-lg">
                       {cleanSummaryText(summaryData.summary)}
                     </div>
@@ -637,7 +641,7 @@ export const DocumentsView: React.FC<DocumentsViewProps> = ({
 
                   {summaryData.bullet_points && summaryData.bullet_points.length > 0 && (
                     <div>
-                      <p className="font-bold text-slate-900 text-lg mb-3">Ý chính cần nắm vững:</p>
+                      <p className="font-bold text-slate-900 text-lg mb-3">{t("Ý chính cần nắm vững:")}</p>
                       <ul className="space-y-3">
                         {summaryData.bullet_points.map((b, i) => (
                           <li key={i} className="flex items-start gap-3 text-base sm:text-lg text-slate-700 leading-8">
@@ -651,7 +655,7 @@ export const DocumentsView: React.FC<DocumentsViewProps> = ({
 
                   {summaryData.key_concepts && summaryData.key_concepts.length > 0 && (
                     <div>
-                      <p className="font-bold text-slate-900 text-lg mb-3">Khái niệm và thuật ngữ quan trọng:</p>
+                      <p className="font-bold text-slate-900 text-lg mb-3">{t("Khái niệm và thuật ngữ quan trọng:")}</p>
                       <ul className="space-y-3">
                         {summaryData.key_concepts.map((concept, i) => (
                           <li key={i} className="flex items-start gap-3 text-base sm:text-lg text-slate-700 leading-8">
@@ -665,7 +669,7 @@ export const DocumentsView: React.FC<DocumentsViewProps> = ({
 
                   {summaryData.conclusion && (
                     <div className="border-t border-slate-200 pt-5">
-                      <p className="font-bold text-slate-900 text-lg mb-3">Kết luận:</p>
+                      <p className="font-bold text-slate-900 text-lg mb-3">{t("Kết luận:")}</p>
                       <div className="whitespace-pre-wrap text-slate-700 leading-8 text-base sm:text-lg">
                         {cleanSummaryText(summaryData.conclusion)}
                       </div>
@@ -674,7 +678,7 @@ export const DocumentsView: React.FC<DocumentsViewProps> = ({
 
                   {summaryData.keywords && summaryData.keywords.length > 0 && (
                     <div>
-                      <p className="font-bold text-slate-900 text-lg mb-3">Từ khóa:</p>
+                      <p className="font-bold text-slate-900 text-lg mb-3">{t("Từ khóa:")}</p>
                       <div className="flex flex-wrap gap-2">
                         {summaryData.keywords.map((keyword, i) => (
                           <span key={i} className="rounded-full bg-blue-50 px-3 py-1 text-sm font-medium text-blue-700">
@@ -722,8 +726,8 @@ export const DocumentsView: React.FC<DocumentsViewProps> = ({
                 <Trash2 className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="text-base font-bold text-slate-900">Xác nhận xóa tài liệu?</h3>
-                <p className="text-xs text-slate-500">Hành động này không thể hoàn tác</p>
+                <h3 className="text-base font-bold text-slate-900">{t("Xác nhận xóa tài liệu?")}</h3>
+                <p className="text-xs text-slate-500">{t("Hành động này không thể hoàn tác")}</p>
               </div>
             </div>
 
@@ -763,7 +767,7 @@ export const DocumentsView: React.FC<DocumentsViewProps> = ({
                 ) : (
                   <Trash2 className="w-3.5 h-3.5" />
                 )}
-                <span>Xác nhận xóa</span>
+                <span>{t("Xác nhận xóa")}</span>
               </button>
             </div>
           </div>

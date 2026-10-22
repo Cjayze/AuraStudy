@@ -1,5 +1,7 @@
 import React from 'react';
-import { LayoutDashboard, FileText, MessageSquareQuote, CheckSquare, Sparkles, FolderSync, Layers3 } from 'lucide-react';
+import { BrandMark } from './BrandMark';
+import { LayoutDashboard, FileText, MessageSquareQuote, CheckSquare, FolderSync, Layers3 } from 'lucide-react';
+import { Language, translate } from '../i18n';
 
 type AppTab = 'dashboard' | 'documents' | 'chat' | 'quizzes' | 'flashcards';
 
@@ -9,6 +11,7 @@ interface SidebarProps {
   documentCount?: number;
   quizCount?: number;
   flashcardCount?: number;
+  language?: Language;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -16,36 +19,38 @@ export const Sidebar: React.FC<SidebarProps> = ({
   setActiveTab,
   documentCount = 0,
   quizCount = 0,
-  flashcardCount = 0
+  flashcardCount = 0,
+  language = 'vi' as Language
 }) => {
+  const t = (key: Parameters<typeof translate>[1]) => translate(language, key);
   const navItems = [
     {
       id: 'dashboard',
-      label: 'Tổng quan',
+      label: t('dashboard'),
       icon: LayoutDashboard,
       badge: null
     },
     {
       id: 'documents',
-      label: 'Tài liệu học tập',
+      label: t('documents'),
       icon: FileText,
       badge: documentCount > 0 ? documentCount : null
     },
     {
       id: 'chat',
-      label: 'Trợ lý Aura AI',
+      label: t('chat'),
       icon: MessageSquareQuote,
       badge: 'RAG'
     },
     {
       id: 'quizzes',
-      label: 'Thi & Trắc nghiệm',
+      label: t('quizzes'),
       icon: CheckSquare,
       badge: quizCount > 0 ? quizCount : null
     },
     {
       id: 'flashcards',
-      label: 'Flashcard',
+      label: t('flashcards'),
       icon: Layers3,
       badge: flashcardCount > 0 ? flashcardCount : null
     }
@@ -55,7 +60,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     <aside id="app-sidebar" className="w-full md:w-64 bg-slate-50/70 md:min-h-[calc(100vh-61px)] border-r border-slate-200/80 p-3 md:p-4 flex flex-col justify-between shrink-0">
       <div className="space-y-1 md:space-y-1.5">
         <div className="hidden md:block px-3 py-2 text-[11px] font-semibold text-slate-400 tracking-wider uppercase">
-          Không gian học tập
+          {t('workspace')}
         </div>
         <nav className="flex md:flex-col gap-1 overflow-x-auto md:overflow-visible pb-2 md:pb-0">
           {navItems.map((item) => {
@@ -99,11 +104,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {/* Mini Feature Card in Sidebar */}
       <div className="hidden md:block mt-6 p-3.5 bg-gradient-to-br from-blue-50 to-slate-100 border border-blue-100/80 rounded-2xl">
         <div className="flex items-center gap-2 text-blue-900 font-semibold text-xs mb-1">
-          <Sparkles className="w-3.5 h-3.5 text-blue-600" />
-          <span>Aura Copilot</span>
+          <BrandMark className="w-3.5 h-3.5 text-blue-600" />
+          <span>{t('copilot')}</span>
         </div>
         <p className="text-[11px] text-slate-600 leading-relaxed mb-2.5">
-          Tải lên tài liệu PDF hoặc TXT để tra cứu câu hỏi chuẩn xác và sinh bộ đề thi trắc nghiệm trong 5 giây.
+          {t('copilotDesc')}
         </p>
         <button
           id="sidebar-quick-upload-btn"
@@ -111,7 +116,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           className="w-full py-1.5 px-2.5 bg-white hover:bg-blue-50 border border-blue-200 text-blue-700 text-xs font-medium rounded-lg shadow-2xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
         >
           <FolderSync className="w-3.5 h-3.5" />
-          <span>Quản lý tài liệu</span>
+          <span>{t('manageDocs')}</span>
         </button>
       </div>
     </aside>

@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
+import { BrandMark } from './BrandMark';
 import { User } from '../types';
 import { api } from '../services/api';
 import { supabase } from '../lib/supabase';
-import { LogIn, UserPlus, Sparkles, BookOpen, AlertCircle, CheckCircle2, X } from 'lucide-react';
+import { LogIn, UserPlus, BookOpen, AlertCircle, CheckCircle2, X } from 'lucide-react';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -144,7 +145,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
           </div>
           <div>
             <h2 className="text-xl font-bold text-slate-800 flex items-center gap-1.5">
-              AuraStudy <Sparkles className="w-4 h-4 text-amber-500 fill-amber-400" />
+              AuraStudy <BrandMark className="w-4 h-4 text-amber-500 fill-amber-400" />
             </h2>
             <p className="text-xs text-slate-500">
               {isRegister ? 'Đăng ký tài khoản học tập ' : 'Đăng nhập hệ thống '}

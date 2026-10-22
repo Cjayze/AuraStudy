@@ -1,4 +1,5 @@
 import React from 'react';
+import { BrandMark } from './BrandMark';
 import {
   ArrowDown,
   ArrowRight,
@@ -6,7 +7,6 @@ import {
   Check,
   FileText,
   MessageCircle,
-  Sparkles,
   Upload,
   WandSparkles,
 } from 'lucide-react';
@@ -59,7 +59,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLogin }) => (
       <section className="relative mx-auto grid min-h-[620px] max-w-7xl items-center gap-12 px-5 pb-20 pt-10 sm:px-8 lg:grid-cols-[0.92fr_1.08fr] lg:gap-8 lg:pb-24 lg:pt-8">
         <div className="relative z-10 max-w-2xl">
           <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-blue-100 bg-white/80 px-3.5 py-2 text-sm font-semibold text-blue-700 shadow-sm">
-            <Sparkles className="h-4 w-4" />
+            <BrandMark className="h-4 w-4" />
             Trợ lý học tập AI dành cho bạn
           </div>
           <h1 className="text-5xl font-extrabold leading-[1.08] tracking-[-0.055em] sm:text-6xl lg:text-[72px]">
@@ -139,7 +139,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLogin }) => (
             </div>
           </div>
           <div className="landing-float landing-float-late absolute -left-2 top-[19%] hidden items-center gap-3 rounded-2xl border border-white bg-white/95 px-4 py-3 shadow-lg shadow-blue-100 sm:flex">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-100 text-blue-700"><Sparkles className="h-4 w-4" /></div>
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-100 text-blue-700"><BrandMark className="h-4 w-4" /></div>
             <div><p className="text-xs font-bold">Tóm tắt thông minh</p><p className="mt-1 text-[11px] text-slate-500">Nắm ý chính nhanh chóng</p></div>
           </div>
           <div className="landing-float landing-float-delay absolute -right-1 bottom-[16%] hidden items-center gap-3 rounded-2xl border border-white bg-white/95 px-4 py-3 shadow-lg shadow-sky-100 sm:flex">

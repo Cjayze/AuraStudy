@@ -1,9 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { BrandMark } from './BrandMark';
 import { DocumentItem, ChatMessage } from '../types';
 import { api } from '../services/api';
+import { Language, translateText } from '../i18n';
 import {
   Send,
-  Sparkles,
   Bot,
   User as UserIcon,
   ChevronDown,
@@ -49,14 +50,17 @@ interface ChatViewProps {
   selectedDocument: DocumentItem | null;
   onSelectDocument: (doc: DocumentItem | null) => void;
   onOpenQuizModal: (doc: DocumentItem) => void;
+  language?: Language;
 }
 
 export const ChatView: React.FC<ChatViewProps> = ({
   documents,
   selectedDocument,
   onSelectDocument,
-  onOpenQuizModal
+  onOpenQuizModal,
+  language = 'vi'
 }) => {
+  const t = (text: string) => translateText(language, text);
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: 'welcome',
@@ -124,7 +128,7 @@ export const ChatView: React.FC<ChatViewProps> = ({
       const errorMsg: ChatMessage = {
         id: `err_${Date.now()}`,
         role: 'assistant',
-        content: `⚠️ Có lỗi xảy ra khi xử lý câu hỏi: ${err?.message || 'Không thể kết nối đến máy chủ.'}`,
+        content: language === 'en' ? `Unable to process your question: ${err?.message || 'Could not connect to the server.'}` : `C? l?i x?y ra khi x? l? c?u h?i: ${err?.message || 'Kh?ng th? k?t n?i ??n m?y ch?.'}`,
         timestamp: new Date().toISOString()
       };
       setMessages((prev) => [...prev, errorMsg]);
@@ -163,7 +167,7 @@ export const ChatView: React.FC<ChatViewProps> = ({
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200/80 bg-white p-3.5 shadow-sm sm:px-5">
         <div className="flex items-center gap-2.5 flex-1 min-w-[260px]">
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-sky-400 text-white shadow-sm shadow-blue-200">
-            <Sparkles className="h-5 w-5" />
+            <BrandMark dark className="h-5 w-5" />
           </div>
           <div className="flex-1">
             <label className="block text-xs font-semibold text-slate-800 sm:text-sm">
@@ -201,14 +205,14 @@ export const ChatView: React.FC<ChatViewProps> = ({
               className="flex cursor-pointer items-center gap-1.5 rounded-xl border border-blue-100 bg-blue-50 px-3 py-2 text-xs font-semibold text-blue-700 transition-colors hover:bg-blue-100"
             >
               <Layers className="h-3.5 w-3.5 text-blue-600" />
-              <span className="hidden sm:inline">Tạo đề thi từ bài này</span>
+              <span className="hidden sm:inline">{t("Tạo đề thi từ bài này")}</span>
             </button>
           )}
 
           <button
             id="chat-clear-btn"
             onClick={handleClearHistory}
-            title="Làm mới cuộc trò chuyện"
+            title={t("Làm mới cuộc trò chuyện")}
             className="cursor-pointer rounded-xl p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
           >
             <RotateCcw className="w-4 h-4" />
@@ -227,7 +231,7 @@ export const ChatView: React.FC<ChatViewProps> = ({
             >
               {isAI && (
                 <div className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-700 ring-1 ring-blue-100">
-                  <Sparkles className="h-4 w-4" />
+                  <BrandMark className="h-4 w-4" />
                 </div>
               )}
 
@@ -239,7 +243,7 @@ export const ChatView: React.FC<ChatViewProps> = ({
                       : 'rounded-tr-md bg-blue-600 text-white shadow-sm shadow-blue-200'
                   }`}
                 >
-                  {!isAI && <div className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-blue-100">Bạn</div>}
+                  {!isAI && <div className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-blue-100">{t("Bạn")}</div>}
                   <FormattedMessage content={msg.content} />
                 </div>
 
@@ -321,7 +325,7 @@ export const ChatView: React.FC<ChatViewProps> = ({
             </div>
             <div className="p-3.5 bg-slate-50 border border-slate-200/70 rounded-2xl text-xs text-slate-500 flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-blue-600 animate-ping"></span>
-              <span>Aura AI đang tra cứu tài liệu & đối chiếu kiến thức...</span>
+              <span>{t("Aura AI đang tra cứu tài liệu & đối chiếu kiến thức...")}</span>
             </div>
           </div>
         )}
@@ -355,7 +359,7 @@ export const ChatView: React.FC<ChatViewProps> = ({
             id="chat-send-btn"
             type="submit"
             disabled={!input.trim() || loading}
-            aria-label="Gửi tin nhắn"
+            aria-label={t("Gửi tin nhắn")}
             className="flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-xl bg-blue-600 text-white shadow-sm shadow-blue-200 transition-all hover:bg-blue-700 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
           >
             <Send className="w-4 h-4" />

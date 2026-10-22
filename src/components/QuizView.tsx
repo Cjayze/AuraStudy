@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { BrandMark } from './BrandMark';
 import { QuizItem, QuizDetail, QuizSubmitResult, DocumentItem, Question } from '../types';
 import { api } from '../services/api';
+import { Language, translateText } from '../i18n';
 import {
   CheckSquare,
-  Sparkles,
   Upload,
   FileText,
   Plus,
@@ -30,6 +31,7 @@ interface QuizViewProps {
   onRefresh: () => void;
   preSelectedDoc?: DocumentItem | null;
   onClearPreSelectedDoc?: () => void;
+  language?: Language;
 }
 
 function getQuestionOptions(question: Pick<Question, 'options' | 'option_a' | 'option_b' | 'option_c' | 'option_d'>) {
@@ -45,8 +47,10 @@ export const QuizView: React.FC<QuizViewProps> = ({
   loading,
   onRefresh,
   preSelectedDoc,
-  onClearPreSelectedDoc
+  onClearPreSelectedDoc,
+  language = 'vi'
 }) => {
+  const t = (text: string) => translateText(language, text);
   // Modal & Flow states
   const [isGeneratorOpen, setIsGeneratorOpen] = useState(false);
   const [generatorMode, setGeneratorMode] = useState<'choose' | 'document' | 'file'>('choose');
@@ -297,7 +301,7 @@ export const QuizView: React.FC<QuizViewProps> = ({
         {/* Question Navigator Numbers */}
         <div className="bg-white rounded-2xl border border-slate-200/90 shadow-2xs p-3.5">
           <div className="flex items-center justify-between text-xs text-slate-500 mb-2">
-            <span>Danh sách câu hỏi:</span>
+            <span>{t("Danh sách câu hỏi:")}</span>
             <span>Tiến độ: {answeredCount}/{totalQ} câu</span>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -333,7 +337,7 @@ export const QuizView: React.FC<QuizViewProps> = ({
               </span>
               {q.concept_tested && (
                 <span className="px-2.5 py-1 bg-slate-100 text-slate-700 font-medium text-xs rounded-lg flex items-center gap-1.5 border border-slate-200/60">
-                  <Sparkles className="w-3.5 h-3.5 text-blue-600" />
+                  <BrandMark className="w-3.5 h-3.5 text-blue-600" />
                   <span>Trọng tâm: {q.concept_tested}</span>
                 </span>
               )}
@@ -383,7 +387,7 @@ export const QuizView: React.FC<QuizViewProps> = ({
                 className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 disabled:opacity-30 rounded-xl transition-colors flex items-center gap-1.5 cursor-pointer"
               >
                 <ArrowLeft className="w-3.5 h-3.5" />
-                <span>Câu trước</span>
+                <span>{t("Câu trước")}</span>
               </button>
 
               <button
@@ -414,7 +418,7 @@ export const QuizView: React.FC<QuizViewProps> = ({
                   onClick={() => setCurrentQuestionIndex((prev) => Math.min(prev + 1, totalQ - 1))}
                   className="px-4 py-2 text-xs font-semibold text-blue-600 hover:bg-blue-50 rounded-xl transition-colors flex items-center gap-1.5 cursor-pointer"
                 >
-                  <span>Câu tiếp theo</span>
+                  <span>{t("Câu tiếp theo")}</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </button>
               )}
@@ -451,7 +455,7 @@ export const QuizView: React.FC<QuizViewProps> = ({
               <span className="text-4xl sm:text-5xl font-black tracking-tight text-white">
                 {attempt.score}
               </span>
-              <span className="text-xs font-semibold text-blue-200 mt-0.5">Thang điểm 100</span>
+              <span className="text-xs font-semibold text-blue-200 mt-0.5">{t("Thang điểm 100")}</span>
             </div>
           </div>
         </div>
@@ -459,8 +463,8 @@ export const QuizView: React.FC<QuizViewProps> = ({
         {/* AI Weakness Analysis Pedagogical Box */}
         <div className="bg-blue-50/70 border border-blue-200/80 rounded-2xl p-5 sm:p-6 space-y-3">
           <div className="flex items-center gap-2 text-blue-950 font-bold text-sm">
-            <Sparkles className="w-4 h-4 text-blue-600" />
-            <span>Phân tích năng lực & Lỗ hổng kiến thức từ Aura AI</span>
+            <BrandMark className="w-4 h-4 text-blue-600" />
+            <span>{t("Phân tích năng lực & Lỗ hổng kiến thức từ Aura AI")}</span>
           </div>
 
           <p className="text-xs sm:text-sm text-blue-900 leading-relaxed font-medium">
@@ -469,7 +473,7 @@ export const QuizView: React.FC<QuizViewProps> = ({
 
           {weakness_analysis.recommended_review_topics.length > 0 && (
             <div className="space-y-1 pt-1">
-              <p className="text-xs font-semibold text-blue-950">Chủ đề bài học cần xem lại kỹ:</p>
+              <p className="text-xs font-semibold text-blue-950">{t("Chủ đề bài học cần xem lại kỹ:")}</p>
               <div className="flex flex-wrap gap-1.5">
                 {weakness_analysis.recommended_review_topics.map((t, idx) => (
                   <span
@@ -490,7 +494,7 @@ export const QuizView: React.FC<QuizViewProps> = ({
 
         {/* Action Controls */}
         <div className="flex items-center justify-between gap-3">
-          <h3 className="text-base font-bold text-slate-900">Chi tiết từng câu hỏi & Lời giải:</h3>
+          <h3 className="text-base font-bold text-slate-900">{t("Chi tiết từng câu hỏi & Lời giải:")}</h3>
           <div className="flex items-center gap-2">
             <button
               onClick={() => {
@@ -501,7 +505,7 @@ export const QuizView: React.FC<QuizViewProps> = ({
               className="px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-semibold rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer"
             >
               <RotateCcw className="w-3.5 h-3.5" />
-              <span>Làm lại bài này</span>
+              <span>{t("Làm lại bài này")}</span>
             </button>
             <button
               onClick={() => {
@@ -641,8 +645,8 @@ export const QuizView: React.FC<QuizViewProps> = ({
           }}
           className="px-4 py-2.5 bg-orange-500 hover:bg-orange-600 active:bg-orange-700 text-white text-xs sm:text-sm font-semibold rounded-xl shadow-md shadow-orange-100 flex items-center justify-center gap-2 transition-all cursor-pointer"
         >
-          <Sparkles className="w-4 h-4 text-amber-200" />
-          <span>Tạo đề thi</span>
+          <BrandMark dark className="w-4 h-4 text-amber-200" />
+          <span>{t("Tạo đề thi")}</span>
         </button>
       </div>
 
@@ -650,12 +654,12 @@ export const QuizView: React.FC<QuizViewProps> = ({
       {loading ? (
         <div className="text-center py-12">
           <div className="w-8 h-8 border-3 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
-          <p className="text-xs text-slate-500">Đang tải danh sách bài thi...</p>
+          <p className="text-xs text-slate-500">{t("Đang tải danh sách bài thi...")}</p>
         </div>
       ) : quizzes.length === 0 ? (
         <div className="bg-white rounded-2xl border border-dashed border-slate-200 p-12 text-center">
           <CheckSquare className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-          <h3 className="text-base font-semibold text-slate-700">Chưa có đề thi nào</h3>
+          <h3 className="text-base font-semibold text-slate-700">{t("Chưa có đề thi nào")}</h3>
           <p className="text-xs text-slate-400 max-w-sm mx-auto mt-1 mb-4">
             Tạo đề từ tài liệu học tập hoặc nhập nguyên bộ câu hỏi từ file trắc nghiệm của bạn.
           </p>
@@ -690,12 +694,12 @@ export const QuizView: React.FC<QuizViewProps> = ({
                         : 'bg-emerald-50 text-emerald-700 border border-emerald-200'
                     }`}
                   >
-                    {q.difficulty === 'hard' ? 'Nâng cao' : q.difficulty === 'medium' ? 'Trung bình' : 'Cơ bản'}
+                    {q.difficulty === 'hard' ? t('Nâng cao') : q.difficulty === 'medium' ? t('Trung bình') : t('Cơ bản')}
                   </span>
 
                   <button
                     onClick={() => setDeleteConfirmQuiz(q)}
-                    title="Xóa bộ đề"
+                    title={t("Xóa bộ đề")}
                     className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -710,11 +714,11 @@ export const QuizView: React.FC<QuizViewProps> = ({
 
                 <div className="grid grid-cols-2 gap-2 bg-slate-50 p-2.5 rounded-xl border border-slate-100 text-xs mb-4">
                   <div>
-                    <span className="text-slate-400 text-[10px] block">Số câu hỏi</span>
+                    <span className="text-slate-400 text-[10px] block">{t("Số câu hỏi")}</span>
                     <span className="font-bold text-slate-800">{q.total_questions} câu</span>
                   </div>
                   <div>
-                    <span className="text-slate-400 text-[10px] block">Điểm cao nhất</span>
+                    <span className="text-slate-400 text-[10px] block">{t("Điểm cao nhất")}</span>
                     <span className="font-bold text-blue-600">
                       {q.best_score !== null ? `${q.best_score} đ` : 'Chưa thi'}
                     </span>
@@ -730,7 +734,7 @@ export const QuizView: React.FC<QuizViewProps> = ({
                   className="w-full py-2 px-3 bg-orange-500 hover:bg-orange-600 active:bg-orange-700 text-white text-xs font-semibold rounded-xl flex items-center justify-center gap-1.5 transition-colors shadow-2xs shadow-orange-100 cursor-pointer"
                 >
                   <Play className="w-3.5 h-3.5 fill-current" />
-                  <span>Bắt đầu làm bài</span>
+                  <span>{t("Bắt đầu làm bài")}</span>
                 </button>
               </div>
             </div>
@@ -745,14 +749,14 @@ export const QuizView: React.FC<QuizViewProps> = ({
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
-                  {generatorMode === 'file' ? <Upload className="w-4 h-4" /> : <Sparkles className="w-4 h-4 text-amber-500 fill-amber-400" />}
+                  {generatorMode === 'file' ? <Upload className="w-4 h-4" /> : <BrandMark className="w-4 h-4 text-amber-500 fill-amber-400" />}
                 </div>
                 <div>
                   <h3 className="text-base font-bold text-slate-900">
-                    {generatorMode === 'choose' ? 'Tạo đề thi trắc nghiệm' : generatorMode === 'document' ? 'Tạo đề từ tài liệu' : 'Tạo quiz từ file trắc nghiệm'}
+                    {generatorMode === 'choose' ? t('Tạo đề thi trắc nghiệm') : generatorMode === 'document' ? t('Tạo đề từ tài liệu') : t('Tạo quiz từ file trắc nghiệm')}
                   </h3>
                   <p className="text-xs text-slate-500">
-                    {generatorMode === 'choose' ? 'Chọn cách tạo đề phù hợp với bạn' : generatorMode === 'document' ? 'Aura AI tạo câu hỏi từ nội dung tài liệu' : 'Nhập toàn bộ câu hỏi và đáp án có sẵn trong file'}
+                    {generatorMode === 'choose' ? t('Chọn cách tạo đề phù hợp với bạn') : generatorMode === 'document' ? t('Aura AI tạo câu hỏi từ nội dung tài liệu') : t('Nhập toàn bộ câu hỏi và đáp án có sẵn trong file')}
                   </p>
                 </div>
               </div>
@@ -779,10 +783,10 @@ export const QuizView: React.FC<QuizViewProps> = ({
                   className="w-full rounded-2xl border border-blue-200 bg-blue-50/70 p-4 text-left transition hover:border-blue-400 hover:bg-blue-50"
                 >
                   <span className="flex items-center gap-3">
-                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white"><Sparkles className="h-5 w-5" /></span>
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white"><BrandMark dark className="h-5 w-5" /></span>
                     <span>
-                      <span className="block text-sm font-bold text-slate-900">Tạo đề từ tài liệu</span>
-                      <span className="mt-1 block text-xs leading-5 text-slate-600">Dùng Aura AI tạo 3, 5, 10 hoặc 15 câu từ tài liệu học tập.</span>
+                      <span className="block text-sm font-bold text-slate-900">{t("Tạo đề từ tài liệu")}</span>
+                      <span className="mt-1 block text-xs leading-5 text-slate-600">{t("Dùng Aura AI tạo 3, 5, 10 hoặc 15 câu từ tài liệu học tập.")}</span>
                     </span>
                   </span>
                 </button>
@@ -794,7 +798,7 @@ export const QuizView: React.FC<QuizViewProps> = ({
                   <span className="flex items-center gap-3">
                     <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-violet-600 text-white"><Upload className="h-5 w-5" /></span>
                     <span>
-                      <span className="block text-sm font-bold text-slate-900">{sourceDocumentForQuiz ? 'Tạo quiz từ file đã tải lên' : 'Tạo quiz từ file câu hỏi trắc nghiệm'}</span>
+                      <span className="block text-sm font-bold text-slate-900">{sourceDocumentForQuiz ? t('Tạo quiz từ file đã tải lên') : t('Tạo quiz từ file câu hỏi trắc nghiệm')}</span>
                       <span className="mt-1 block text-xs leading-5 text-slate-600">
                         {sourceDocumentForQuiz
                           ? `Dùng trực tiếp “${sourceDocumentForQuiz.file_name}”, không cần tải lại.`
@@ -808,7 +812,7 @@ export const QuizView: React.FC<QuizViewProps> = ({
 
             {generatorMode === 'document' && <form onSubmit={handleGenerateQuiz} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Tài liệu nguồn</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">{t("Tài liệu nguồn")}</label>
                 <select
                   id="gen-quiz-doc-select"
                   value={genDocumentId}
@@ -816,7 +820,7 @@ export const QuizView: React.FC<QuizViewProps> = ({
                   required
                   className="w-full px-3.5 py-2 text-xs sm:text-sm border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                  <option value="">-- Chọn tài liệu trong thư viện --</option>
+                  <option value="">{t("-- Chọn tài liệu trong thư viện --")}</option>
                   {documents.map((d) => (
                     <option key={d.id} value={d.id}>
                       {d.title} ({d.subject})
@@ -827,31 +831,31 @@ export const QuizView: React.FC<QuizViewProps> = ({
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">Độ khó đề thi</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">{t("Độ khó đề thi")}</label>
                   <select
                     id="gen-quiz-diff-select"
                     value={genDifficulty}
                     onChange={(e) => setGenDifficulty(e.target.value as any)}
                     className="w-full px-3 py-2 text-xs sm:text-sm border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
-                    <option value="easy">Cơ bản (Easy)</option>
-                    <option value="medium">Trung bình (Medium)</option>
-                    <option value="hard">Nâng cao (Hard)</option>
+                    <option value="easy">{t("Cơ bản (Easy)")}</option>
+                    <option value="medium">{t("Trung bình (Medium)")}</option>
+                    <option value="hard">{t("Nâng cao (Hard)")}</option>
                   </select>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">Số lượng câu hỏi</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">{t("Số lượng câu hỏi")}</label>
                   <select
                     id="gen-quiz-count-select"
                     value={genQuestionCount}
                     onChange={(e) => setGenQuestionCount(parseInt(e.target.value, 10))}
                     className="w-full px-3 py-2 text-xs sm:text-sm border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
-                    <option value={3}>3 câu hỏi nhanh</option>
-                    <option value={5}>5 câu hỏi tiêu chuẩn</option>
-                    <option value={10}>10 câu hỏi tổng quát</option>
-                    <option value={15}>15 câu hỏi chuyên sâu</option>
+                    <option value={3}>{t("3 câu hỏi nhanh")}</option>
+                    <option value={5}>{t("5 câu hỏi tiêu chuẩn")}</option>
+                    <option value={10}>{t("10 câu hỏi tổng quát")}</option>
+                    <option value={15}>{t("15 câu hỏi chuyên sâu")}</option>
                   </select>
                 </div>
               </div>
@@ -863,7 +867,7 @@ export const QuizView: React.FC<QuizViewProps> = ({
                 <input
                   id="gen-quiz-topic-input"
                   type="text"
-                  placeholder="Ví dụ: Cú pháp điều khiển, so sánh match vs switch, kiểu dữ liệu..."
+                  placeholder={t("Ví dụ: Cú pháp điều khiển, so sánh match vs switch, kiểu dữ liệu...")}
                   value={genCustomTopic}
                   onChange={(e) => setGenCustomTopic(e.target.value)}
                   className="w-full px-3.5 py-2 text-xs sm:text-sm border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -873,8 +877,8 @@ export const QuizView: React.FC<QuizViewProps> = ({
               {/* Smart Quiz Examination Mode Note */}
               <div className="p-3 bg-blue-50/70 rounded-xl border border-blue-100 text-xs text-blue-900 space-y-1">
                 <div className="flex items-center gap-1.5 font-semibold text-blue-700">
-                  <Sparkles className="w-3.5 h-3.5 text-amber-500 shrink-0" />
-                  <span>Bộ tạo câu hỏi trọng tâm & đa dạng</span>
+                  <BrandMark className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                  <span>{t("Bộ tạo câu hỏi trọng tâm & đa dạng")}</span>
                 </div>
                 <p className="text-[11px] text-slate-600 leading-relaxed">
                   Tự động loại bỏ tiêu đề bài giảng, tên giảng viên và thông tin hành chính. Đa dạng hóa các dạng câu hỏi: phân tích kết quả code, so sánh cơ chế, nhận diện khẳng định đúng/sai và tình huống thực tiễn.
@@ -899,8 +903,8 @@ export const QuizView: React.FC<QuizViewProps> = ({
                     <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
                   ) : (
                     <>
-                      <Sparkles className="w-4 h-4 text-amber-200" />
-                      <span>Khởi tạo đề thi bằng AI</span>
+                      <BrandMark dark className="w-4 h-4 text-amber-200" />
+                      <span>{t("Khởi tạo đề thi bằng AI")}</span>
                     </>
                   )}
                 </button>
@@ -925,7 +929,7 @@ export const QuizView: React.FC<QuizViewProps> = ({
                   <span className="text-sm font-semibold text-slate-800">
                     {importFile ? importFile.name : 'Chọn file đề trắc nghiệm'}
                   </span>
-                  <span className="mt-1 text-xs text-slate-500">PDF, DOCX hoặc TXT · tối đa 25 MB</span>
+                  <span className="mt-1 text-xs text-slate-500">{t("PDF, DOCX hoặc TXT · tối đa 25 MB")}</span>
                   <input
                     id="quiz-source-file"
                     type="file"
@@ -935,15 +939,15 @@ export const QuizView: React.FC<QuizViewProps> = ({
                   />
                 </label>}
                 <div className="rounded-xl border border-blue-100 bg-blue-50/70 p-3 text-xs leading-5 text-slate-600">
-                  <strong className="font-semibold text-slate-700">Lưu ý khi chuẩn bị file</strong>
+                  <strong className="font-semibold text-slate-700">{t("Lưu ý khi chuẩn bị file")}</strong>
                   <ul className="mt-1 list-disc space-y-1 pl-4">
-                    <li>Đánh số từng câu; mỗi lựa chọn để riêng một dòng và bắt đầu bằng A., B., C., D. (có thể tiếp tục đến Z.).</li>
-                    <li>Đặt đáp án đúng ngay dưới câu theo dạng “Đáp án: B”, hoặc đánh dấu lựa chọn đúng bằng ✓, [x], “(Đúng)” hay “(Correct)”.</li>
-                    <li>Nếu đáp án ở cuối file, ghi rõ “Đáp án” rồi ghép số câu với chữ cái, ví dụ: “1A - 2C - 3B”; có thể để nhiều cặp trên một dòng hoặc mỗi dòng riêng.</li>
-                    <li>Với bảng, nên có cột riêng cho số câu và đáp án. Mỗi câu cần có một đáp án hợp lệ khớp với nhãn lựa chọn.</li>
+                    <li>{t("Đánh số từng câu; mỗi lựa chọn để riêng một dòng và bắt đầu bằng A., B., C., D. (có thể tiếp tục đến Z.).")}</li>
+                    <li>{t("Đặt đáp án đúng ngay dưới câu theo dạng “Đáp án: B”, hoặc đánh dấu lựa chọn đúng bằng ✓, [x], “(Đúng)” hay “(Correct)”.")}</li>
+                    <li>{t("Nếu đáp án ở cuối file, ghi rõ “Đáp án” rồi ghép số câu với chữ cái, ví dụ: “1A - 2C - 3B”; có thể để nhiều cặp trên một dòng hoặc mỗi dòng riêng.")}</li>
+                    <li>{t("Với bảng, nên có cột riêng cho số câu và đáp án. Mỗi câu cần có một đáp án hợp lệ khớp với nhãn lựa chọn.")}</li>
                   </ul>
                 </div>
-                {!sourceDocumentForQuiz && <p className="text-[11px] text-slate-500">File nhập cũng được lưu trong Thư viện tài liệu để bạn có thể xem lại.</p>}
+                {!sourceDocumentForQuiz && <p className="text-[11px] text-slate-500">{t("File nhập cũng được lưu trong Thư viện tài liệu để bạn có thể xem lại.")}</p>}
                 <div className="flex justify-between gap-2 pt-1">
                   <button
                     type="button"
@@ -958,7 +962,7 @@ export const QuizView: React.FC<QuizViewProps> = ({
                     className="flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-xs font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     {genLoading ? <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" /> : <Upload className="h-4 w-4" />}
-                    {sourceDocumentForQuiz ? 'Tạo quiz từ file này' : 'Tải lên và tạo quiz'}
+                    {sourceDocumentForQuiz ? t('Tạo quiz từ file này') : t('Tải lên và tạo quiz')}
                   </button>
                 </div>
               </form>
@@ -982,8 +986,8 @@ export const QuizView: React.FC<QuizViewProps> = ({
                 <Trash2 className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="text-base font-bold text-slate-900">Xác nhận xóa bộ đề thi?</h3>
-                <p className="text-xs text-slate-500">Hành động này không thể hoàn tác</p>
+                <h3 className="text-base font-bold text-slate-900">{t("Xác nhận xóa bộ đề thi?")}</h3>
+                <p className="text-xs text-slate-500">{t("Hành động này không thể hoàn tác")}</p>
               </div>
             </div>
 
@@ -1023,7 +1027,7 @@ export const QuizView: React.FC<QuizViewProps> = ({
                 ) : (
                   <Trash2 className="w-3.5 h-3.5" />
                 )}
-                <span>Xác nhận xóa</span>
+                <span>{t("Xác nhận xóa")}</span>
               </button>
             </div>
           </div>
