@@ -262,7 +262,7 @@ export const QuizView: React.FC<QuizViewProps> = ({
     const answeredCount = Object.keys(userAnswers).length;
 
     return (
-      <div id="quiz-taking-screen" className="p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto space-y-6">
+      <div id="quiz-taking-screen" className="mx-auto max-w-4xl space-y-5 p-3 sm:space-y-6 sm:p-6 lg:p-8">
         {/* Top Sticky Bar */}
         <div className="bg-white rounded-2xl border border-slate-200/90 shadow-2xs p-4 flex flex-wrap items-center justify-between gap-4 sticky top-16 z-20">
           <div>
@@ -434,7 +434,7 @@ export const QuizView: React.FC<QuizViewProps> = ({
     const { attempt, weakness_analysis, results } = examResult;
 
     return (
-      <div id="quiz-result-screen" className="p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto space-y-6">
+      <div id="quiz-result-screen" className="mx-auto max-w-4xl space-y-5 p-3 sm:space-y-6 sm:p-6 lg:p-8">
         
         {/* Score Card Banner */}
         <div className="bg-gradient-to-br from-blue-900 via-blue-800 to-slate-900 text-white rounded-3xl p-6 sm:p-8 shadow-xl relative overflow-hidden">
@@ -594,7 +594,7 @@ export const QuizView: React.FC<QuizViewProps> = ({
 
   // RENDER 3: Quiz List & Generator Trigger
   return (
-    <div id="quiz-list-screen" className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
+    <div id="quiz-list-screen" className="mx-auto min-w-0 max-w-7xl space-y-5 p-3 sm:space-y-6 sm:p-6 lg:p-8">
       {/* Toast Notification Banner */}
       {quizNotification && (
         <div
@@ -744,8 +744,8 @@ export const QuizView: React.FC<QuizViewProps> = ({
 
       {/* Quiz creation chooser and forms */}
       {isGeneratorOpen && (
-        <div id="quiz-gen-modal-backdrop" className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
-          <div id="quiz-gen-modal" className="bg-white rounded-2xl shadow-2xl border border-slate-200 max-w-lg w-full p-6 relative">
+        <div id="quiz-gen-modal-backdrop" className="fixed inset-0 z-50 flex items-end justify-center overflow-y-auto bg-slate-900/60 backdrop-blur-sm p-2 sm:items-center sm:p-4">
+          <div id="quiz-gen-modal" className="relative my-auto max-h-[calc(100dvh-1rem)] w-full max-w-lg overflow-y-auto rounded-2xl border border-slate-200 bg-white p-4 shadow-2xl sm:p-6">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">

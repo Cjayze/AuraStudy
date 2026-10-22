@@ -116,6 +116,10 @@ export default function App() {
     }
   }, [user, fetchData]);
 
+  useEffect(() => {
+    document.documentElement.lang = user?.language === 'en' ? 'en' : 'vi';
+  }, [user?.language]);
+
   // Listen for unauthorized events to prompt login
   useEffect(() => {
     const handleUnauthorized = () => {
@@ -176,11 +180,12 @@ export default function App() {
         user={user}
         onOpenAuth={() => setIsAuthOpen(true)}
         onLogout={handleLogout}
+        onUserUpdated={setUser}
         activeTab={activeTab}
       />
 
       {/* Main Layout Body */}
-      <div className="flex-1 flex flex-col md:flex-row">
+      <div className="flex-1 flex flex-col lg:flex-row">
         {/* Navigation Sidebar */}
         <Sidebar
           activeTab={activeTab}
@@ -188,10 +193,11 @@ export default function App() {
           documentCount={documents.length}
           quizCount={quizzes.length}
           flashcardCount={flashcardSets.length}
+          language={user.language === 'en' ? 'en' : 'vi'}
         />
 
         {/* View Contents Container */}
-        <main className="flex-1 overflow-x-hidden min-h-[calc(100vh-61px)]">
+        <main className="min-w-0 flex-1 overflow-x-hidden min-h-[calc(100vh-61px)]">
           {activeTab === 'dashboard' && (
             <DashboardView
               data={dashboardData}
@@ -200,6 +206,7 @@ export default function App() {
               onSelectDocumentForChat={handleSelectDocForChat}
               onSelectDocumentForQuiz={handleSelectDocForQuiz}
               onRefresh={fetchData}
+              language={user.language === 'en' ? 'en' : 'vi'}
             />
           )}
 
@@ -212,6 +219,7 @@ export default function App() {
               onRefresh={fetchData}
               onSelectDocumentForChat={handleSelectDocForChat}
               onSelectDocumentForQuiz={handleSelectDocForQuiz}
+              language={user.language === 'en' ? 'en' : 'vi'}
             />
           )}
 
@@ -221,6 +229,7 @@ export default function App() {
               selectedDocument={selectedDocForChat}
               onSelectDocument={setSelectedDocForChat}
               onOpenQuizModal={handleSelectDocForQuiz}
+              language={user.language === 'en' ? 'en' : 'vi'}
             />
           )}
 
@@ -232,6 +241,7 @@ export default function App() {
               onRefresh={fetchData}
               preSelectedDoc={preSelectedDocForQuiz}
               onClearPreSelectedDoc={() => setPreSelectedDocForQuiz(null)}
+              language={user.language === 'en' ? 'en' : 'vi'}
             />
           )}
 
@@ -241,6 +251,7 @@ export default function App() {
               documents={documents}
               loading={loading}
               onRefresh={fetchData}
+              language={user.language === 'en' ? 'en' : 'vi'}
             />
           )}
         </main>

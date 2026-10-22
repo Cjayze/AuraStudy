@@ -57,12 +57,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
   ] as const;
 
   return (
-    <aside id="app-sidebar" className="w-full md:w-64 bg-slate-50/70 md:min-h-[calc(100vh-61px)] border-r border-slate-200/80 p-3 md:p-4 flex flex-col justify-between shrink-0">
-      <div className="space-y-1 md:space-y-1.5">
-        <div className="hidden md:block px-3 py-2 text-[11px] font-semibold text-slate-400 tracking-wider uppercase">
+    <aside id="app-sidebar" className="w-full lg:w-64 bg-slate-50/70 lg:min-h-[calc(100vh-61px)] border-b border-slate-200/80 lg:border-b-0 lg:border-r p-2 sm:p-3 lg:p-4 flex flex-col justify-between shrink-0">
+      <div className="space-y-1 lg:space-y-1.5">
+        <div className="hidden lg:block px-3 py-2 text-[11px] font-semibold text-slate-400 tracking-wider uppercase">
           {t('workspace')}
         </div>
-        <nav className="flex md:flex-col gap-1 overflow-x-auto md:overflow-visible pb-2 md:pb-0">
+        <nav className="flex lg:flex-col gap-1 overflow-x-auto lg:overflow-visible pb-1 lg:pb-0">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
@@ -71,7 +71,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 key={item.id}
                 id={`sidebar-tab-${item.id}`}
                 onClick={() => setActiveTab(item.id)}
-                className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all whitespace-nowrap cursor-pointer ${
+                className={`flex shrink-0 items-center justify-between px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-xl text-xs sm:text-sm font-medium transition-all whitespace-nowrap cursor-pointer ${
                   isActive
                     ? 'bg-blue-600 text-white shadow-sm shadow-blue-200'
                     : 'text-slate-600 hover:bg-slate-200/60 hover:text-slate-900'
@@ -102,7 +102,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       </div>
 
       {/* Mini Feature Card in Sidebar */}
-      <div className="hidden md:block mt-6 p-3.5 bg-gradient-to-br from-blue-50 to-slate-100 border border-blue-100/80 rounded-2xl">
+      <div className="hidden lg:block mt-6 p-3.5 bg-gradient-to-br from-blue-50 to-slate-100 border border-blue-100/80 rounded-2xl">
         <div className="flex items-center gap-2 text-blue-900 font-semibold text-xs mb-1">
           <BrandMark className="w-3.5 h-3.5 text-blue-600" />
           <span>{t('copilot')}</span>

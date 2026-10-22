@@ -161,11 +161,11 @@ export const ChatView: React.FC<ChatViewProps> = ({
   };
 
   return (
-    <div id="chat-view-content" className="mx-auto flex h-[calc(100vh-61px)] max-w-5xl flex-col gap-3 bg-slate-50/50 p-3 sm:gap-4 sm:p-6">
+    <div id="chat-view-content" className="mx-auto flex h-[calc(100dvh-145px)] min-h-[420px] w-full max-w-5xl min-w-0 flex-col gap-3 bg-slate-50/50 p-2.5 sm:p-4 sm:gap-4 lg:h-[calc(100vh-61px)] lg:p-6">
       
       {/* Top Bar: Context Selector & Tools */}
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200/80 bg-white p-3.5 shadow-sm sm:px-5">
-        <div className="flex items-center gap-2.5 flex-1 min-w-[260px]">
+        <div className="flex min-w-0 flex-1 items-center gap-2.5">
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-sky-400 text-white shadow-sm shadow-blue-200">
             <BrandMark dark className="h-5 w-5" />
           </div>

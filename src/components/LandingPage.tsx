@@ -56,13 +56,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLogin }) => (
     </header>
 
     <main id="top">
-      <section className="relative mx-auto grid min-h-[620px] max-w-7xl items-center gap-12 px-5 pb-20 pt-10 sm:px-8 lg:grid-cols-[0.92fr_1.08fr] lg:gap-8 lg:pb-24 lg:pt-8">
+      <section className="relative mx-auto grid min-h-[540px] max-w-7xl items-center gap-8 px-4 pb-14 pt-8 sm:min-h-[620px] sm:gap-12 sm:px-8 sm:pb-20 sm:pt-10 lg:grid-cols-[0.92fr_1.08fr] lg:gap-8 lg:pb-24 lg:pt-8">
         <div className="relative z-10 max-w-2xl">
           <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-blue-100 bg-white/80 px-3.5 py-2 text-sm font-semibold text-blue-700 shadow-sm">
             <BrandMark className="h-4 w-4" />
             Trợ lý học tập AI dành cho bạn
           </div>
-          <h1 className="text-5xl font-extrabold leading-[1.08] tracking-[-0.055em] sm:text-6xl lg:text-[72px]">
+          <h1 className="text-4xl font-extrabold leading-[1.08] tracking-[-0.055em] min-[390px]:text-5xl sm:text-6xl lg:text-[72px]">
             Học tập rõ ràng,
             <span className="landing-gradient block">tiến bộ mỗi ngày.</span>
           </h1>
@@ -91,7 +91,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLogin }) => (
           </div>
         </div>
 
-        <div className="relative mx-auto flex min-h-[420px] w-full max-w-[620px] items-center justify-center lg:min-h-[540px]">
+        <div className="relative mx-auto flex min-h-[340px] w-full max-w-[620px] items-center justify-center sm:min-h-[420px] lg:min-h-[540px]">
           <div className="landing-orb absolute left-[14%] top-[12%] h-64 w-64 rounded-full bg-blue-300/30 blur-3xl" />
           <div className="landing-orb landing-orb-delay absolute bottom-[8%] right-[8%] h-64 w-64 rounded-full bg-sky-300/35 blur-3xl" />
           <div className="landing-float relative w-full max-w-[490px] rounded-[30px] border border-white/80 bg-white/75 p-4 shadow-[0_30px_100px_-35px_rgba(37,99,235,0.24)] backdrop-blur-xl sm:p-6">

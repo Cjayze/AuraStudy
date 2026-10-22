@@ -213,7 +213,7 @@ export const FlashcardView: React.FC<FlashcardViewProps> = ({ sets, documents, l
     const card = activeSet.cards[activeIndex];
     const progressPercent = Math.round(((activeIndex + 1) / activeSet.cards.length) * 100);
     return (
-      <div className="mx-auto flex min-h-[calc(100vh-61px)] max-w-5xl flex-col px-4 py-5 sm:px-8 sm:py-8">
+      <div className="mx-auto flex min-h-[calc(100dvh-130px)] max-w-5xl flex-col px-3 py-4 sm:px-8 sm:py-8 lg:min-h-[calc(100vh-61px)]">
         <div className="flex items-center justify-between gap-3">
           <button onClick={() => { setActiveSet(null); void onRefresh(); }} className="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-slate-600 hover:bg-white hover:text-slate-900">
             <ArrowLeft className="h-4 w-4" /> Quay lại bộ thẻ
@@ -269,7 +269,7 @@ export const FlashcardView: React.FC<FlashcardViewProps> = ({ sets, documents, l
   }
 
   return (
-    <div className="mx-auto min-h-[calc(100vh-61px)] max-w-6xl px-4 py-6 sm:px-8 sm:py-9">
+    <div className="mx-auto min-h-[calc(100dvh-130px)] max-w-6xl px-3 py-5 sm:px-8 sm:py-9 lg:min-h-[calc(100vh-61px)]">
       <div className="mb-7 flex flex-wrap items-end justify-between gap-4">
         <div>
           <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-blue-700"><Layers3 className="h-4 w-4" /> {t("Không gian ghi nhớ")}</div>
@@ -318,8 +318,8 @@ export const FlashcardView: React.FC<FlashcardViewProps> = ({ sets, documents, l
       )}
 
       {creatorOpen && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/40 p-0 backdrop-blur-sm sm:items-center sm:p-4" onMouseDown={(event) => { if (event.target === event.currentTarget && !saving && !aiLoading) resetCreator(); }}>
-          <div role="dialog" aria-modal="true" aria-labelledby="flashcard-modal-title" className="max-h-[94vh] w-full max-w-3xl overflow-y-auto rounded-t-3xl bg-white p-5 shadow-2xl sm:rounded-3xl sm:p-7">
+        <div className="fixed inset-0 z-50 flex items-end justify-center overflow-y-auto bg-slate-950/40 p-2 backdrop-blur-sm sm:items-center sm:p-4" onMouseDown={(event) => { if (event.target === event.currentTarget && !saving && !aiLoading) resetCreator(); }}>
+          <div role="dialog" aria-modal="true" aria-labelledby="flashcard-modal-title" className="my-auto max-h-[calc(100dvh-1rem)] w-full max-w-3xl overflow-y-auto rounded-2xl bg-white p-4 shadow-2xl sm:max-h-[94vh] sm:rounded-3xl sm:p-7">
             <div className="mb-6 flex items-start justify-between gap-4">
               <div>
                 <div className="mb-1 flex items-center gap-2 text-sm font-semibold text-blue-700"><Layers3 className="h-4 w-4" /> {t("Flashcard")}</div>

@@ -234,7 +234,7 @@ export const DocumentsView: React.FC<DocumentsViewProps> = ({
   };
 
   return (
-    <div id="documents-view-content" className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
+    <div id="documents-view-content" className="mx-auto min-w-0 max-w-7xl space-y-5 p-3 sm:space-y-6 sm:p-6 lg:p-8">
       {/* Toast Notification Banner */}
       {notification && (
         <div
@@ -433,8 +433,8 @@ export const DocumentsView: React.FC<DocumentsViewProps> = ({
 
       {/* Upload Document Modal */}
       {isUploadOpen && (
-        <div id="upload-doc-modal-backdrop" className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
-          <div id="upload-doc-modal" className="bg-white rounded-2xl shadow-2xl border border-slate-200 max-w-lg w-full p-6 relative">
+        <div id="upload-doc-modal-backdrop" className="fixed inset-0 z-50 flex items-end justify-center overflow-y-auto bg-slate-900/60 backdrop-blur-sm p-2 sm:items-center sm:p-4">
+          <div id="upload-doc-modal" className="relative my-auto max-h-[calc(100dvh-1rem)] w-full max-w-lg overflow-y-auto rounded-2xl border border-slate-200 bg-white p-4 shadow-2xl sm:p-6">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
@@ -557,8 +557,8 @@ export const DocumentsView: React.FC<DocumentsViewProps> = ({
 
       {/* Preview Document Modal */}
       {previewDoc && (
-        <div id="preview-doc-modal-backdrop" className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
-          <div id="preview-doc-modal" className="bg-white rounded-2xl shadow-2xl border border-slate-200 max-w-2xl w-full p-6 relative max-h-[85vh] flex flex-col">
+        <div id="preview-doc-modal-backdrop" className="fixed inset-0 z-50 flex items-end justify-center overflow-y-auto bg-slate-900/60 backdrop-blur-sm p-2 sm:items-center sm:p-4">
+          <div id="preview-doc-modal" className="relative my-auto flex max-h-[calc(100dvh-1rem)] w-full max-w-2xl flex-col overflow-y-auto rounded-2xl border border-slate-200 bg-white p-4 shadow-2xl sm:max-h-[85vh] sm:p-6">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
               <div>
                 <h3 className="text-base font-bold text-slate-900">{previewDoc.title}</h3>
@@ -604,8 +604,8 @@ export const DocumentsView: React.FC<DocumentsViewProps> = ({
 
       {/* AI Summary Modal */}
       {summaryDoc && (
-        <div id="summary-doc-modal-backdrop" className="fixed inset-0 z-50 flex overflow-y-auto items-start sm:items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
-          <div id="summary-doc-modal" className="my-auto bg-white rounded-2xl shadow-2xl max-w-4xl w-full p-6 sm:p-8 relative max-h-[calc(100vh-2rem)] flex flex-col">
+        <div id="summary-doc-modal-backdrop" className="fixed inset-0 z-50 flex items-end justify-center overflow-y-auto bg-slate-900/60 backdrop-blur-sm p-2 sm:items-center sm:p-4">
+          <div id="summary-doc-modal" className="relative my-auto flex max-h-[calc(100dvh-1rem)] w-full max-w-4xl flex-col overflow-y-auto rounded-2xl bg-white p-4 shadow-2xl sm:max-h-[calc(100vh-2rem)] sm:p-8">
             <div className="flex shrink-0 items-center justify-between pb-5 border-b border-slate-100">
               <div className="flex items-center gap-2">
                 <div>
