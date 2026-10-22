@@ -1,18 +1,22 @@
 import React from 'react';
-import { LayoutDashboard, FileText, MessageSquareQuote, CheckSquare, Sparkles, FolderSync } from 'lucide-react';
+import { LayoutDashboard, FileText, MessageSquareQuote, CheckSquare, Sparkles, FolderSync, Layers3 } from 'lucide-react';
+
+type AppTab = 'dashboard' | 'documents' | 'chat' | 'quizzes' | 'flashcards';
 
 interface SidebarProps {
-  activeTab: 'dashboard' | 'documents' | 'chat' | 'quizzes';
-  setActiveTab: (tab: 'dashboard' | 'documents' | 'chat' | 'quizzes') => void;
+  activeTab: AppTab;
+  setActiveTab: (tab: AppTab) => void;
   documentCount?: number;
   quizCount?: number;
+  flashcardCount?: number;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
   activeTab,
   setActiveTab,
   documentCount = 0,
-  quizCount = 0
+  quizCount = 0,
+  flashcardCount = 0
 }) => {
   const navItems = [
     {
@@ -38,6 +42,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
       label: 'Thi & Trắc nghiệm',
       icon: CheckSquare,
       badge: quizCount > 0 ? quizCount : null
+    },
+    {
+      id: 'flashcards',
+      label: 'Flashcard',
+      icon: Layers3,
+      badge: flashcardCount > 0 ? flashcardCount : null
     }
   ] as const;
 

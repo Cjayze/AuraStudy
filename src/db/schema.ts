@@ -1,4 +1,4 @@
-import { pgTable, text, integer, boolean, timestamp, jsonb } from 'drizzle-orm/pg-core';
+import { pgTable, text, integer, boolean, timestamp, jsonb, unique } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
 // Users table supporting Supabase Auth UID and traditional user IDs
@@ -42,8 +42,8 @@ export const documentChunks = pgTable('document_chunks', {
 // Chat sessions
 export const chatSessions = pgTable('chat_sessions', {
   id: text('id').primaryKey(),
-  userId: text('user_id').notNull(),
-  documentId: text('document_id'),
+  userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  documentId: text('document_id').references(() => documents.id, { onDelete: 'set null' }),
   title: text('title').notNull(),
   createdAt: timestamp('created_at').defaultNow()
 });
@@ -62,7 +62,7 @@ export const chatMessages = pgTable('chat_messages', {
 export const quizzes = pgTable('quizzes', {
   id: text('id').primaryKey(),
   documentId: text('document_id').notNull(),
-  userId: text('user_id').notNull(),
+  userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
   title: text('title').notNull(),
   difficulty: text('difficulty').default('medium'),
   totalQuestions: integer('total_questions').default(0),
@@ -114,6 +114,38 @@ export const learningProgress = pgTable('learning_progress', {
   averageScore: integer('average_score').default(0),
   lastActiveAt: timestamp('last_active_at').defaultNow()
 });
+
+export const flashcardSets = pgTable('flashcard_sets', {
+  id: text('id').primaryKey(),
+  userId: text('user_id').notNull(),
+  documentId: text('document_id'),
+  title: text('title').notNull(),
+  subject: text('subject').notNull().default('Chung'),
+  description: text('description'),
+  creationMethod: text('creation_method').notNull().default('manual'),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull()
+});
+
+export const flashcards = pgTable('flashcards', {
+  id: text('id').primaryKey(),
+  setId: text('set_id').notNull().references(() => flashcardSets.id, { onDelete: 'cascade' }),
+  frontText: text('front_text').notNull(),
+  backText: text('back_text').notNull(),
+  position: integer('position').notNull().default(0),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull()
+});
+
+export const flashcardProgress = pgTable('flashcard_progress', {
+  id: text('id').primaryKey(),
+  userId: text('user_id').notNull(),
+  flashcardId: text('flashcard_id').notNull().references(() => flashcards.id, { onDelete: 'cascade' }),
+  status: text('status').notNull().default('new'),
+  reviewCount: integer('review_count').notNull().default(0),
+  lastReviewedAt: timestamp('last_reviewed_at', { withTimezone: true }),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull()
+}, (table) => [unique().on(table.userId, table.flashcardId)]);
 
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({

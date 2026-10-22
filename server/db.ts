@@ -115,6 +115,38 @@ export interface LearningProgress {
   last_active_at: string;
 }
 
+export interface FlashcardSetRecord {
+  id: string;
+  user_id: string;
+  document_id?: string | null;
+  title: string;
+  subject: string;
+  description?: string | null;
+  creation_method: 'manual' | 'ai';
+  created_at: string;
+  updated_at: string;
+}
+
+export interface FlashcardRecord {
+  id: string;
+  set_id: string;
+  front_text: string;
+  back_text: string;
+  position: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface FlashcardProgressRecord {
+  id: string;
+  user_id: string;
+  flashcard_id: string;
+  status: 'new' | 'learning' | 'known';
+  review_count: number;
+  last_reviewed_at?: string | null;
+  updated_at: string;
+}
+
 export interface DatabaseState {
   users: User[];
   documents: Document[];
@@ -126,6 +158,9 @@ export interface DatabaseState {
   quiz_attempts: QuizAttempt[];
   quiz_answers: QuizAnswer[];
   learning_progress: LearningProgress[];
+  flashcard_sets: FlashcardSetRecord[];
+  flashcards: FlashcardRecord[];
+  flashcard_progress: FlashcardProgressRecord[];
 }
 
 const DATA_DIR = path.join(process.cwd(), 'data');
@@ -361,7 +396,10 @@ Chuẩn hóa dữ liệu là quá trình tổ chức lại các bảng và thu�
     questions,
     quiz_attempts: [attempt1],
     quiz_answers: [],
-    learning_progress: [progress]
+    learning_progress: [progress],
+    flashcard_sets: [],
+    flashcards: [],
+    flashcard_progress: []
   };
 }
 
@@ -378,6 +416,9 @@ export function getDb(): DatabaseState {
       const data = fs.readFileSync(DB_FILE, 'utf-8');
       db = JSON.parse(data);
       if (db) {
+        db.flashcard_sets ||= [];
+        db.flashcards ||= [];
+        db.flashcard_progress ||= [];
         // Purge any legacy demo student account
         db.users = (db.users || []).filter(u => u.id !== 'usr_student_01' && u.email !== 'student@aurastudy.edu.vn');
         db.learning_progress = (db.learning_progress || []).filter(p => p.user_id !== 'usr_student_01');
@@ -419,6 +460,40 @@ export async function syncToPostgres(): Promise<void> {
   try {
     const pool = createPool();
     await pool.query('ALTER TABLE "questions" ADD COLUMN IF NOT EXISTS "options" jsonb');
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS flashcard_sets (
+        id text PRIMARY KEY,
+        user_id text NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        document_id text REFERENCES documents(id) ON DELETE SET NULL,
+        title text NOT NULL,
+        subject text NOT NULL DEFAULT 'Chung',
+        description text,
+        creation_method text NOT NULL DEFAULT 'manual',
+        created_at timestamptz NOT NULL DEFAULT now(),
+        updated_at timestamptz NOT NULL DEFAULT now()
+      );
+      CREATE TABLE IF NOT EXISTS flashcards (
+        id text PRIMARY KEY,
+        set_id text NOT NULL REFERENCES flashcard_sets(id) ON DELETE CASCADE,
+        front_text text NOT NULL,
+        back_text text NOT NULL,
+        position integer NOT NULL DEFAULT 0,
+        created_at timestamptz NOT NULL DEFAULT now(),
+        updated_at timestamptz NOT NULL DEFAULT now()
+      );
+      CREATE TABLE IF NOT EXISTS flashcard_progress (
+        id text PRIMARY KEY,
+        user_id text NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        flashcard_id text NOT NULL REFERENCES flashcards(id) ON DELETE CASCADE,
+        status text NOT NULL DEFAULT 'new',
+        review_count integer NOT NULL DEFAULT 0,
+        last_reviewed_at timestamptz,
+        updated_at timestamptz NOT NULL DEFAULT now(),
+        UNIQUE(user_id, flashcard_id)
+      );
+      CREATE INDEX IF NOT EXISTS flashcard_sets_user_idx ON flashcard_sets(user_id);
+      CREATE INDEX IF NOT EXISTS flashcards_set_idx ON flashcards(set_id);
+    `);
     // 1. Sync users
     for (const u of db.users) {
       if (u.id === 'usr_student_01' || u.email === 'student@aurastudy.edu.vn') continue;
@@ -462,6 +537,37 @@ export async function syncToPostgres(): Promise<void> {
         [item.id, item.quiz_id, item.question_text, item.option_a || '', item.option_b || '', item.option_c || '', item.option_d || '', item.correct_ans || 'A', item.explanation || '', item.options ? JSON.stringify(item.options) : null]
       );
     }
+
+    for (const set of (db.flashcard_sets || [])) {
+      await pool.query(
+        `INSERT INTO flashcard_sets (id, user_id, document_id, title, subject, description, creation_method, created_at, updated_at)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+         ON CONFLICT (id) DO UPDATE SET title=EXCLUDED.title, subject=EXCLUDED.subject, description=EXCLUDED.description, updated_at=EXCLUDED.updated_at`,
+        [set.id, set.user_id, set.document_id || null, set.title, set.subject || 'Chung', set.description || null, set.creation_method || 'manual', set.created_at, set.updated_at]
+      );
+    }
+    for (const card of (db.flashcards || [])) {
+      await pool.query(
+        `INSERT INTO flashcards (id, set_id, front_text, back_text, position, created_at, updated_at)
+         VALUES ($1,$2,$3,$4,$5,$6,$7)
+         ON CONFLICT (id) DO UPDATE SET front_text=EXCLUDED.front_text, back_text=EXCLUDED.back_text, position=EXCLUDED.position, updated_at=EXCLUDED.updated_at`,
+        [card.id, card.set_id, card.front_text, card.back_text, card.position, card.created_at, card.updated_at]
+      );
+    }
+    for (const progress of (db.flashcard_progress || [])) {
+      await pool.query(
+        `INSERT INTO flashcard_progress (id, user_id, flashcard_id, status, review_count, last_reviewed_at, updated_at)
+         VALUES ($1,$2,$3,$4,$5,$6,$7)
+         ON CONFLICT (user_id, flashcard_id) DO UPDATE SET status=EXCLUDED.status, review_count=EXCLUDED.review_count, last_reviewed_at=EXCLUDED.last_reviewed_at, updated_at=EXCLUDED.updated_at`,
+        [progress.id, progress.user_id, progress.flashcard_id, progress.status, progress.review_count, progress.last_reviewed_at || null, progress.updated_at]
+      );
+    }
+    const setIds = (db.flashcard_sets || []).map((set) => set.id);
+    const cardIds = (db.flashcards || []).map((card) => card.id);
+    const progressIds = (db.flashcard_progress || []).map((progress) => progress.id);
+    await pool.query('DELETE FROM flashcard_progress WHERE NOT (id = ANY($1::text[]))', [progressIds]);
+    await pool.query('DELETE FROM flashcards WHERE NOT (id = ANY($1::text[]))', [cardIds]);
+    await pool.query('DELETE FROM flashcard_sets WHERE NOT (id = ANY($1::text[]))', [setIds]);
 
     // 4. Sync quiz attempts
     for (const att of (db.quiz_attempts || [])) {

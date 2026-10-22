@@ -5,7 +5,9 @@ import {
   QuizItem,
   QuizDetail,
   QuizSubmitResult,
-  DocumentSummary
+  DocumentSummary,
+  FlashcardSet,
+  FlashcardDraft
 } from '../types';
 
 const BASE_URL = '/api';
@@ -223,6 +225,82 @@ export const api = {
         ...getAuthHeader()
       },
       body: JSON.stringify({ document_id: documentId, type })
+    });
+    return handleResponse(res);
+  },
+
+  // Flashcards
+  getFlashcardSets: async (): Promise<FlashcardSet[]> => {
+    const res = await fetch(`${BASE_URL}/flashcards`, { headers: { ...getAuthHeader() } });
+    return handleResponse(res);
+  },
+
+  getFlashcardSet: async (id: string): Promise<FlashcardSet> => {
+    const res = await fetch(`${BASE_URL}/flashcards/${id}`, { headers: { ...getAuthHeader() } });
+    return handleResponse(res);
+  },
+
+  generateFlashcards: async (documentId: string): Promise<{ cards: FlashcardDraft[]; document_id: string; document_title: string }> => {
+    const res = await fetch(`${BASE_URL}/flashcards/generate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
+      body: JSON.stringify({ document_id: documentId })
+    });
+    return handleResponse(res);
+  },
+
+  createFlashcardSet: async (payload: {
+    title: string; subject: string; description?: string; document_id?: string | null;
+    creation_method: 'manual' | 'ai'; cards: FlashcardDraft[];
+  }): Promise<FlashcardSet> => {
+    const res = await fetch(`${BASE_URL}/flashcards`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
+      body: JSON.stringify(payload)
+    });
+    return handleResponse(res);
+  },
+
+  updateFlashcardSet: async (id: string, payload: {
+    title: string; subject: string; description?: string; cards: FlashcardDraft[];
+  }): Promise<FlashcardSet> => {
+    const res = await fetch(`${BASE_URL}/flashcards/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
+      body: JSON.stringify(payload)
+    });
+    return handleResponse(res);
+  },
+
+  deleteFlashcardSet: async (id: string): Promise<{ message: string }> => {
+    const res = await fetch(`${BASE_URL}/flashcards/${id}`, { method: 'DELETE', headers: { ...getAuthHeader() } });
+    return handleResponse(res);
+  },
+
+  addFlashcard: async (setId: string, card: FlashcardDraft): Promise<unknown> => {
+    const res = await fetch(`${BASE_URL}/flashcards/${setId}/cards`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json', ...getAuthHeader() }, body: JSON.stringify(card)
+    });
+    return handleResponse(res);
+  },
+
+  updateFlashcard: async (cardId: string, card: FlashcardDraft): Promise<unknown> => {
+    const res = await fetch(`${BASE_URL}/flashcards/cards/${cardId}`, {
+      method: 'PUT', headers: { 'Content-Type': 'application/json', ...getAuthHeader() }, body: JSON.stringify(card)
+    });
+    return handleResponse(res);
+  },
+
+  deleteFlashcard: async (cardId: string): Promise<{ message: string }> => {
+    const res = await fetch(`${BASE_URL}/flashcards/cards/${cardId}`, { method: 'DELETE', headers: { ...getAuthHeader() } });
+    return handleResponse(res);
+  },
+
+  reviewFlashcard: async (setId: string, cardId: string, status: 'learning' | 'known'): Promise<unknown> => {
+    const res = await fetch(`${BASE_URL}/flashcards/${setId}/progress`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
+      body: JSON.stringify({ card_id: cardId, status })
     });
     return handleResponse(res);
   },

@@ -143,3 +143,34 @@ export interface DocumentSummary {
   exam_tips?: string[];
   word_count?: number;
 }
+
+export interface Flashcard {
+  id: string;
+  set_id: string;
+  front_text: string;
+  back_text: string;
+  position: number;
+  status: 'new' | 'learning' | 'known';
+  review_count: number;
+  last_reviewed_at?: string | null;
+}
+
+export interface FlashcardSet {
+  id: string;
+  title: string;
+  subject: string;
+  description?: string | null;
+  document_id?: string | null;
+  document_title?: string | null;
+  creation_method: 'manual' | 'ai';
+  created_at: string;
+  updated_at: string;
+  total_cards: number;
+  known_cards: number;
+  cards?: Flashcard[];
+}
+
+export interface FlashcardDraft {
+  front_text: string;
+  back_text: string;
+}

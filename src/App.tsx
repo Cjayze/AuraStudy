@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { User, DocumentItem, QuizItem, DashboardData } from './types';
+import { User, DocumentItem, QuizItem, DashboardData, FlashcardSet } from './types';
 import { api } from './services/api';
 import { Navbar } from './components/Navbar';
 import { Sidebar } from './components/Sidebar';
@@ -7,13 +7,14 @@ import { DashboardView } from './components/DashboardView';
 import { DocumentsView } from './components/DocumentsView';
 import { ChatView } from './components/ChatView';
 import { QuizView } from './components/QuizView';
+import { FlashcardView } from './components/FlashcardView';
 import { AuthModal } from './components/AuthModal';
 import { LandingPage } from './components/LandingPage';
 import { supabase } from './lib/supabase';
 
 export default function App() {
   const [user, setUser] = useState<User | null>(null);
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'documents' | 'chat' | 'quizzes'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'documents' | 'chat' | 'quizzes' | 'flashcards'>('dashboard');
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const oauthCallbackHandled = useRef(false);
 
@@ -21,6 +22,7 @@ export default function App() {
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
   const [documents, setDocuments] = useState<DocumentItem[]>([]);
   const [quizzes, setQuizzes] = useState<QuizItem[]>([]);
+  const [flashcardSets, setFlashcardSets] = useState<FlashcardSet[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Cross-view selections
@@ -90,15 +92,17 @@ export default function App() {
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const [dashRes, docsRes, quizRes] = await Promise.allSettled([
+      const [dashRes, docsRes, quizRes, flashcardRes] = await Promise.allSettled([
         api.getDashboardStats(),
         api.getDocuments(),
-        api.getQuizzes()
+        api.getQuizzes(),
+        api.getFlashcardSets()
       ]);
 
       if (dashRes.status === 'fulfilled') setDashboardData(dashRes.value);
       if (docsRes.status === 'fulfilled') setDocuments(docsRes.value);
       if (quizRes.status === 'fulfilled') setQuizzes(quizRes.value);
+      if (flashcardRes.status === 'fulfilled') setFlashcardSets(flashcardRes.value);
     } catch (err) {
       console.error('Error fetching data:', err);
     } finally {
@@ -183,6 +187,7 @@ export default function App() {
           setActiveTab={setActiveTab}
           documentCount={documents.length}
           quizCount={quizzes.length}
+          flashcardCount={flashcardSets.length}
         />
 
         {/* View Contents Container */}
@@ -227,6 +232,15 @@ export default function App() {
               onRefresh={fetchData}
               preSelectedDoc={preSelectedDocForQuiz}
               onClearPreSelectedDoc={() => setPreSelectedDocForQuiz(null)}
+            />
+          )}
+
+          {activeTab === 'flashcards' && (
+            <FlashcardView
+              sets={flashcardSets}
+              documents={documents}
+              loading={loading}
+              onRefresh={fetchData}
             />
           )}
         </main>
