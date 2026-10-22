@@ -1,0 +1,136 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Google Sans', 'Google Sans Text', Roboto, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-display: 'Google Sans', 'Google Sans Text', Roboto, system-ui, sans-serif;
+}
+
+:root {
+  font-family: 'Google Sans', 'Google Sans Text', Roboto, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  letter-spacing: -0.01em;
+}
+
+body {
+  font-family: 'Google Sans', 'Google Sans Text', Roboto, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6, .font-display {
+  font-family: 'Google Sans', 'Google Sans Text', Roboto, system-ui, sans-serif;
+  letter-spacing: -0.02em;
+}
+
+button, input, select, textarea {
+  font-family: inherit;
+}
+
+.landing-gradient {
+  background: linear-gradient(105deg, #2563eb 8%, #3b82f6 48%, #06b6d4 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.landing-float {
+  animation: landing-float 6s ease-in-out infinite;
+}
+
+.landing-float-delay {
+  animation-delay: -2s;
+}
+
+.landing-float-late {
+  animation-delay: -4s;
+}
+
+.landing-orb {
+  animation: landing-breathe 8s ease-in-out infinite alternate;
+}
+
+.landing-orb-delay {
+  animation-delay: -4s;
+}
+
+.landing-card {
+  animation: landing-rise 700ms both;
+}
+
+@keyframes landing-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+}
+
+@keyframes landing-breathe {
+  from { transform: scale(0.92); opacity: 0.65; }
+  to { transform: scale(1.08); opacity: 1; }
+}
+
+@keyframes landing-rise {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.flashcard-scene {
+  perspective: 1400px;
+  min-height: 330px;
+  border-radius: 28px;
+}
+
+.flashcard-inner {
+  position: relative;
+  display: block;
+  min-height: 330px;
+  width: 100%;
+  transform-style: preserve-3d;
+  transition: transform 620ms cubic-bezier(0.2, 0.75, 0.25, 1);
+}
+
+.flashcard-inner.is-flipped {
+  transform: rotateY(180deg);
+}
+
+.flashcard-face {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: auto;
+  padding: clamp(1.5rem, 5vw, 3.5rem);
+  border: 1px solid rgb(219 234 254);
+  border-radius: 28px;
+  text-align: center;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  box-shadow: 0 20px 50px -32px rgb(30 64 175 / 35%), 0 4px 14px rgb(15 23 42 / 5%);
+}
+
+.flashcard-front {
+  background: radial-gradient(ellipse at 85% 10%, rgb(219 234 254 / 70%), transparent 42%), linear-gradient(145deg, #fff 20%, #f8fbff 100%);
+}
+
+.flashcard-back {
+  transform: rotateY(180deg);
+  border-color: rgb(191 219 254);
+  background: radial-gradient(ellipse at 15% 10%, rgb(255 255 255 / 80%), transparent 45%), linear-gradient(145deg, #eff6ff, #dbeafe);
+}
+
+.flashcard-copy {
+  display: block;
+  max-width: 58ch;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  color: #172554;
+  font-size: clamp(1.2rem, 3.2vw, 1.9rem);
+  font-weight: 650;
+  line-height: 1.5;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-float, .landing-orb, .landing-card, .flashcard-inner {
+    animation: none;
+    transition: none;
+  }
+}

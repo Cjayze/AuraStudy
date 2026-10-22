@@ -109,6 +109,26 @@ export const api = {
     return handleResponse(res);
   },
 
+  updateProfile: async (payload: { full_name: string; language: 'vi' | 'en'; avatar?: File | null }): Promise<User> => {
+    const body = new FormData();
+    body.append('full_name', payload.full_name);
+    body.append('language', payload.language);
+    if (payload.avatar) body.append('avatar', payload.avatar);
+    try {
+      const res = await fetch(`${BASE_URL}/auth/profile`, {
+        method: 'PATCH',
+        headers: { ...getAuthHeader() },
+        body
+      });
+      return await handleResponse(res);
+    } catch (error) {
+      if (error instanceof TypeError && /fetch/i.test(error.message)) {
+        throw new Error('Không kết nối được máy chủ AuraStudy. Hãy mở ứng dụng tại http://localhost:3000 và kiểm tra server còn chạy hay không.');
+      }
+      throw error;
+    }
+  },
+
   // Dashboard
   getDashboardStats: async (): Promise<DashboardData> => {
     const res = await fetch(`${BASE_URL}/dashboard`, {

@@ -1,10 +1,30 @@
 import { Router, Response } from 'express';
+import multer from 'multer';
+import fs from 'fs';
+import path from 'path';
+import { randomUUID } from 'node:crypto';
 import { getDb, saveDb, User } from '../db';
 import { generateToken, hashPassword, comparePassword, authenticateToken, AuthRequest } from '../auth';
-import { findUserByEmail, createUserInSupabase, getOrCreateUser } from '../../src/db/users.ts';
+import { findUserByEmail, createUserInSupabase, getOrCreateUser, updateUserProfileInDatabase } from '../../src/db/users.ts';
 import { createPool } from '../../src/db/index.ts';
 
 export const authRouter = Router();
+
+const avatarUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 3 * 1024 * 1024, files: 1 },
+  fileFilter: (_req, file, cb) => {
+    if (['image/jpeg', 'image/png', 'image/webp', 'image/gif'].includes(file.mimetype)) return cb(null, true);
+    return cb(new Error('Ảnh đại diện chỉ hỗ trợ JPG, PNG, WEBP hoặc GIF.'));
+  }
+});
+const handleAvatarUpload = (req: any, res: Response, next: (error?: any) => void) => {
+  avatarUpload.single('avatar')(req, res, (error: any) => {
+    if (!error) return next();
+    const status = error instanceof multer.MulterError && error.code === 'LIMIT_FILE_SIZE' ? 413 : 400;
+    return res.status(status).json({ status: 'error', message: error.message || 'Ảnh đại diện không hợp lệ.' });
+  });
+};
 
 // POST /api/auth/supabase-login
 // Verify the Supabase Auth access token server-side, then issue AuraStudy's API JWT.
@@ -40,7 +60,7 @@ authRouter.post('/supabase-login', async (req, res) => {
     if (!user) {
       user = {
         id: authUser.id, email, password_hash: '', full_name: fullName,
-        role: 'student', avatar_url: avatarUrl, is_active: true,
+        role: 'student', avatar_url: avatarUrl, language: 'vi', is_active: true,
         created_at: new Date().toISOString()
       };
       db.users.push(user);
@@ -57,7 +77,7 @@ authRouter.post('/supabase-login', async (req, res) => {
       status: 'success',
       data: {
         user: { id: user.id, email: user.email, name: user.full_name, full_name: user.full_name,
-          role: user.role, school: user.school || '', avatar_url: user.avatar_url },
+          role: user.role, school: user.school || '', avatar_url: user.avatar_url, language: user.language || 'vi' },
         access_token: token, token_type: 'Bearer'
       }
     });
@@ -186,7 +206,9 @@ authRouter.post('/register', async (req, res) => {
           name: newUser.full_name,
           full_name: newUser.full_name,
           role: newUser.role,
-          school: newUser.school || ''
+          school: newUser.school || '',
+          avatar_url: newUser.avatar_url || '',
+          language: newUser.language || 'vi'
         },
         access_token: token,
         token_type: 'Bearer'
@@ -275,6 +297,7 @@ authRouter.post('/login', async (req, res) => {
           school: supabaseUser.school || undefined,
           role: (supabaseUser.role as any) || 'student',
           avatar_url: supabaseUser.avatarUrl || '',
+          language: supabaseUser.language === 'en' ? 'en' : 'vi',
           is_active: supabaseUser.isActive ?? true,
           created_at: supabaseUser.createdAt ? new Date(supabaseUser.createdAt).toISOString() : new Date().toISOString()
         };
@@ -334,7 +357,8 @@ authRouter.post('/login', async (req, res) => {
           full_name: authenticatedUser.full_name,
           role: authenticatedUser.role,
           school: authenticatedUser.school || '',
-          avatar_url: authenticatedUser.avatar_url
+          avatar_url: authenticatedUser.avatar_url,
+          language: authenticatedUser.language || 'vi'
         },
         access_token: token,
         token_type: 'Bearer'
@@ -363,6 +387,80 @@ authRouter.get('/me', authenticateToken, (req: AuthRequest, res: Response) => {
       role: user.role,
       school: user.school || '',
       avatar_url: user.avatar_url,
+      language: user.language || 'vi',
+      created_at: user.created_at
+    }
+  });
+});
+
+authRouter.patch('/profile', authenticateToken, handleAvatarUpload, async (req: AuthRequest, res: Response) => {
+  const fullName = typeof req.body?.full_name === 'string' ? req.body.full_name.trim() : '';
+  const language = req.body?.language === 'en' ? 'en' : req.body?.language === 'vi' ? 'vi' : null;
+  if (!fullName || fullName.length > 100) {
+    return res.status(400).json({ status: 'error', message: 'Tên hiển thị phải có từ 1 đến 100 ký tự.' });
+  }
+  if (!language) return res.status(400).json({ status: 'error', message: 'Ngôn ngữ được chọn không hợp lệ.' });
+
+  const db = getDb();
+  const user = db.users.find((item) => item.id === req.user!.id);
+  if (!user) return res.status(404).json({ status: 'error', message: 'Không tìm thấy tài khoản.' });
+
+  const previousAvatar = user.avatar_url || '';
+  let nextAvatar = previousAvatar;
+  if (req.file) {
+    const extByMime: Record<string, string> = { 'image/jpeg': '.jpg', 'image/png': '.png', 'image/webp': '.webp', 'image/gif': '.gif' };
+    const avatarDirectory = path.join(process.cwd(), 'uploads', 'avatars');
+    fs.mkdirSync(avatarDirectory, { recursive: true });
+    const filename = `${randomUUID()}${extByMime[req.file.mimetype]}`;
+    fs.writeFileSync(path.join(avatarDirectory, filename), req.file.buffer);
+    nextAvatar = `/uploads/avatars/${filename}`;
+  }
+
+  try {
+    const postgresProfile = await updateUserProfileInDatabase(user.id, {
+      fullName,
+      avatarUrl: nextAvatar,
+      language
+    });
+    if (!postgresProfile) {
+      return res.status(404).json({ status: 'error', message: 'Không tìm thấy hồ sơ tài khoản trong cơ sở dữ liệu.' });
+    }
+  } catch (error) {
+    console.error('Could not update profile in PostgreSQL:', error);
+    if (req.file) {
+      const uploadedPath = path.join(process.cwd(), 'uploads', 'avatars', path.basename(nextAvatar));
+      try { fs.unlinkSync(uploadedPath); } catch { /* Ignore cleanup errors. */ }
+    }
+    return res.status(503).json({
+      status: 'error',
+      message: 'Không thể lưu hồ sơ vào cơ sở dữ liệu. Hãy kiểm tra kết nối Supabase/PostgreSQL rồi thử lại.'
+    });
+  }
+
+  user.full_name = fullName;
+  user.avatar_url = nextAvatar;
+  user.language = language;
+  saveDb();
+
+  if (req.file && previousAvatar.startsWith('/uploads/avatars/')) {
+    const previousPath = path.resolve(process.cwd(), previousAvatar.replace(/^\/+/, ''));
+    const avatarRoot = path.resolve(process.cwd(), 'uploads', 'avatars');
+    if (previousPath.startsWith(`${avatarRoot}${path.sep}`) && fs.existsSync(previousPath)) {
+      try { fs.unlinkSync(previousPath); } catch (error) { console.warn('Could not remove old profile image:', error); }
+    }
+  }
+
+  return res.json({
+    status: 'success',
+    data: {
+      id: user.id,
+      email: user.email,
+      name: user.full_name,
+      full_name: user.full_name,
+      role: user.role,
+      school: user.school || '',
+      avatar_url: user.avatar_url || '',
+      language: user.language,
       created_at: user.created_at
     }
   });

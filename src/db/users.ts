@@ -10,6 +10,7 @@ export interface SupabaseUserData {
   school?: string;
   role?: string;
   avatarUrl?: string;
+  language?: 'vi' | 'en';
   isActive?: boolean;
 }
 
@@ -123,6 +124,25 @@ export async function getOrCreateUser(uid: string, email: string, fullName?: str
     console.error('Error in getOrCreateUser:', error);
     throw new Error('Database query failed. Please try again later.', { cause: error });
   }
+}
+
+/** Persist profile settings to the connected PostgreSQL database. */
+export async function updateUserProfileInDatabase(
+  id: string,
+  profile: { fullName: string; avatarUrl: string; language: 'vi' | 'en' }
+) {
+  const pool = createPool();
+  await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS language text NOT NULL DEFAULT 'vi'`);
+  const result = await pool.query(
+    `UPDATE users
+     SET full_name = $2, avatar_url = $3, language = $4
+     WHERE id = $1
+     RETURNING id, email, full_name, avatar_url, language, role, school, is_active, created_at`,
+    [id, profile.fullName, profile.avatarUrl, profile.language]
+  );
+
+  if (result.rowCount === 0) return null;
+  return result.rows[0];
 }
 
 export async function getUsers() {

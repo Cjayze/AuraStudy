@@ -5,6 +5,7 @@ export interface User {
   role: string;
   avatar_url?: string;
   school?: string;
+  language?: 'vi' | 'en';
   created_at?: string;
 }
 

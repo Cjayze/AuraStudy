@@ -12,6 +12,7 @@ export interface User {
   role: 'student' | 'admin';
   avatar_url?: string;
   school?: string;
+  language?: 'vi' | 'en';
   is_active: boolean;
   created_at: string;
 }
@@ -419,6 +420,7 @@ export function getDb(): DatabaseState {
         db.flashcard_sets ||= [];
         db.flashcards ||= [];
         db.flashcard_progress ||= [];
+        (db.users || []).forEach((user) => { user.language ||= 'vi'; });
         // Purge any legacy demo student account
         db.users = (db.users || []).filter(u => u.id !== 'usr_student_01' && u.email !== 'student@aurastudy.edu.vn');
         db.learning_progress = (db.learning_progress || []).filter(p => p.user_id !== 'usr_student_01');
@@ -460,6 +462,7 @@ export async function syncToPostgres(): Promise<void> {
   try {
     const pool = createPool();
     await pool.query('ALTER TABLE "questions" ADD COLUMN IF NOT EXISTS "options" jsonb');
+    await pool.query('ALTER TABLE "users" ADD COLUMN IF NOT EXISTS "language" text NOT NULL DEFAULT \'vi\'');
     await pool.query(`
       CREATE TABLE IF NOT EXISTS flashcard_sets (
         id text PRIMARY KEY,
@@ -498,14 +501,16 @@ export async function syncToPostgres(): Promise<void> {
     for (const u of db.users) {
       if (u.id === 'usr_student_01' || u.email === 'student@aurastudy.edu.vn') continue;
       await pool.query(
-        `INSERT INTO "users" (id, uid, email, password_hash, full_name, school, role, avatar_url, is_active, created_at)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+        `INSERT INTO "users" (id, uid, email, password_hash, full_name, school, role, avatar_url, is_active, created_at, language)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
          ON CONFLICT (id) DO UPDATE SET
            email = EXCLUDED.email,
            password_hash = COALESCE(EXCLUDED.password_hash, users.password_hash),
            full_name = EXCLUDED.full_name,
-           school = EXCLUDED.school;`,
-        [u.id, u.id, u.email, u.password_hash || '', u.full_name || u.email, u.school || '', u.role || 'student', u.avatar_url || '', u.is_active ?? true, u.created_at || new Date().toISOString()]
+           school = EXCLUDED.school,
+           avatar_url = EXCLUDED.avatar_url,
+           language = EXCLUDED.language;`,
+        [u.id, u.id, u.email, u.password_hash || '', u.full_name || u.email, u.school || '', u.role || 'student', u.avatar_url || '', u.is_active ?? true, u.created_at || new Date().toISOString(), u.language || 'vi']
       );
     }
 

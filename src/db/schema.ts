@@ -11,6 +11,7 @@ export const users = pgTable('users', {
   school: text('school'),
   role: text('role').default('student'),
   avatarUrl: text('avatar_url'),
+  language: text('language').notNull().default('vi'),
   isActive: boolean('is_active').default(true),
   createdAt: timestamp('created_at').defaultNow()
 });
