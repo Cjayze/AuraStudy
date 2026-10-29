@@ -62,18 +62,15 @@ dashboardRouter.get('/', authenticateToken, (req: AuthRequest, res: Response) =>
         };
       });
 
-    // Score trends (sample dates or recent attempts)
-    const scoreTrends = userAttempts.length > 0
-      ? userAttempts.slice(-5).map((att, idx) => ({
-          label: `Quiz #${idx + 1}`,
-          score: att.score,
-          date: new Date(att.completed_at).toLocaleDateString('vi-VN')
-        }))
-      : [
-          { label: 'Quiz #1', score: 75, date: '28/08' },
-          { label: 'Quiz #2', score: 85, date: '01/09' },
-          { label: 'Quiz #3', score: 90, date: '04/09' }
-        ];
+    // Only show real completed attempts, ordered from oldest to newest.
+    const scoreTrends = [...userAttempts]
+      .sort((a, b) => new Date(a.completed_at).getTime() - new Date(b.completed_at).getTime())
+      .slice(-5)
+      .map((attempt, index) => ({
+        label: `Quiz #${index + 1}`,
+        score: attempt.score,
+        date: new Date(attempt.completed_at).toLocaleDateString('vi-VN')
+      }));
 
     return res.status(200).json({
       status: 'success',
