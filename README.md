@@ -2,6 +2,8 @@
 
 AuraStudy is an AI-powered study workspace for organizing course materials, asking questions about uploaded documents, generating quizzes, and tracking learning activity.
 
+**Live demo:** [https://aurastudy-vk2o.onrender.com/](https://aurastudy-vk2o.onrender.com/)
+
 The repository contains a Node.js application that serves the React web app and its API. It also includes an optional, separate FastAPI backend under `backend/`.
 
 ## Features
@@ -76,8 +78,10 @@ Do not commit `.env` or share secrets in issue reports. The `VITE_` variables ar
 
 1. In the Supabase dashboard, enable **Authentication → Providers → Google** and provide your Google OAuth client ID and client secret.
 2. Add the Supabase callback URL shown in the provider settings to the authorized redirect URIs in Google Cloud. It usually has this form: `https://<project-ref>.supabase.co/auth/v1/callback`.
-3. In **Authentication → URL Configuration**, set the local site URL to `http://localhost:3000` and add `http://localhost:3000/**` to the allowed redirect URLs.
+3. In **Authentication → URL Configuration**, set the Site URL to your production URL (`https://aurastudy-vk2o.onrender.com`) and add both `https://aurastudy-vk2o.onrender.com/**` and `http://localhost:3000/**` to the allowed redirect URLs.
 4. Copy the project URL, publishable/anonymous key, and PostgreSQL connection details into `.env` as needed.
+
+For Google OAuth, add the production site URL to the Google OAuth client's **Authorized JavaScript origins**. Keep the Supabase callback URL (usually `https://<project-ref>.supabase.co/auth/v1/callback`) in **Authorized redirect URIs**; the app's Render URL is the post-login redirect, not the Google callback.
 
 ### 4. Start the application
 
@@ -114,7 +118,22 @@ npm start
 NODE_ENV=production npm start
 ```
 
-The Node.js server listens on port `3000`.
+The Node.js server listens on `PORT` when provided by the host, and defaults to port `3000` for local development.
+
+## Live deployment
+
+The current public demo is hosted on Render: [https://aurastudy-vk2o.onrender.com/](https://aurastudy-vk2o.onrender.com/).
+
+The Node.js service serves both the React app and the Express API. To deploy another instance on Render, create a **Web Service** for this repository and use:
+
+| Setting | Value |
+|---|---|
+| Root Directory | Leave blank when connecting this repository directly. |
+| Build Command | `npm ci && npm run build` |
+| Start Command | `npm start` |
+| Health Check Path | `/api/health` |
+
+Set the production environment variables in Render's dashboard. At minimum, configure `JWT_SECRET`, `GEMINI_API_KEY`, `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `VITE_SUPABASE_URL`, and `VITE_SUPABASE_ANON_KEY`. Add `SUPABASE_HOST` and `SUPABASE_PASSWORD` (or `SUPABASE_DB_PASSWORD`) when using PostgreSQL-backed profile operations. Never commit `.env` or place a Supabase service-role key in a `VITE_` variable.
 
 ## Data and uploads
 
@@ -122,6 +141,7 @@ The Node.js server listens on port `3000`.
 - Uploaded documents are stored under `uploads/` and served from `/uploads`.
 - Local data and uploaded files are machine-specific and are not included in Git. Back them up separately if you need to keep them.
 - Configure Supabase PostgreSQL credentials to enable database-backed user profile operations. The local JSON store is still used for application data.
+- On Render, files written to the service's local filesystem may be lost after a restart or redeploy unless a persistent disk is configured and mounted for the paths the application uses. The app's primary data and uploaded files use local paths, so verify storage persistence before using the demo for data that must be kept.
 
 ## Optional FastAPI backend
 
